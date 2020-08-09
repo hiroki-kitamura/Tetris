@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "target": "es5",
+    "module": "es2015",
+    "jsx": "react", // JSXを有効化
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "react",
+      "node",
+      "styled-components"
+    ]
+  }
+}
