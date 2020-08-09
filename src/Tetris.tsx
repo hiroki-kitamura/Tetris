@@ -88,17 +88,18 @@ const Tetris = () => {
   }
 
   const [tetrisState, setTetrisState] = useState({
-    cells: getBlankCells(),
+    viewCells: getBlankCells(),
+    fixedCells: getBlankCells(),
     activeBlock: null
   })
 
   const putActiveBlock = (): void => {
     const newBlock = BlockCreator();
-    const newCells = deepMerge(tetrisState.cells, newBlock.cells)
+
     setTetrisState({
-      cells: newCells,
+      ...tetrisState,
       activeBlock: newBlock
-    });
+    })
   }
 
   const spinActiveBlock = () => {
@@ -146,6 +147,7 @@ const Tetris = () => {
     }
 
     let spinedCells = {}
+    let stickedX
     for (let posXStr in spinedCellsOrigin) {
       for (let posYStr in spinedCellsOrigin[posXStr]) {
         const posX: number = Number(posXStr)
@@ -161,12 +163,10 @@ const Tetris = () => {
       }
     }
 
-    const newCells = deepMerge(tetrisState.cells, deepMerge(afterImageBlock.cells, spinedCells))
-
     setTetrisState({
-      cells: newCells,
+      ...tetrisState,
       activeBlock: {
-        ...tetrisState.activeBlock, cells: spinedCells
+        cells: spinedCells
       }
     })
   }
@@ -228,11 +228,11 @@ const Tetris = () => {
         afterImageBlock.cells[posX][posY] = blankCell;
       }
     }
-    const newCells = deepMerge(tetrisState.cells, deepMerge(afterImageBlock.cells, movedBlock.cells))
+
     setTetrisState({
-      cells: newCells,
+      ...tetrisState,
       activeBlock: movedBlock
-    });
+    })
   }
 
   const canMoveActiveBlockToX = (direction: number): Boolean => {
@@ -247,7 +247,7 @@ const Tetris = () => {
         }
 
         // すでにブロックがあるパターン
-        if (tetrisState.cells[posX + direction][posY].exist) {
+        if (tetrisState.fixedCells[posX + direction][posY].exist) {
           if (tetrisState.activeBlock.cells.hasOwnProperty(posX + direction) && !tetrisState.activeBlock.cells[posX + direction].hasOwnProperty(posY)) {
             return false;
           }
@@ -265,7 +265,7 @@ const Tetris = () => {
         // 一番下に落ちた時
         if (posY === rowNumber - 1) return true
         // 下にブロックがある時
-        if (tetrisState.cells[posX][posY + 1].exist === true && !tetrisState.activeBlock.cells[posX].hasOwnProperty(posY + 1))
+        if (tetrisState.fixedCells[posX][posY + 1].exist === true && !tetrisState.activeBlock.cells[posX].hasOwnProperty(posY + 1))
           return true;
       }
     }
@@ -273,10 +273,10 @@ const Tetris = () => {
   }
 
   const fixActiveBlock = (): void => {
-    const newCells = deepMerge(tetrisState.cells, tetrisState.activeBlock.cells)
+    const newFixedCells = deepMerge(tetrisState.fixedCells, tetrisState.activeBlock.cells)
     setTetrisState({
-      cells: newCells,
-      activeBlock: {}
+      ...tetrisState,
+      fixedCells: newFixedCells
     })
     putActiveBlock()
   }
@@ -316,9 +316,19 @@ const Tetris = () => {
     }
   }, [tetrisState.activeBlock])
 
+  useEffect(() => {
+    setTetrisState({
+      ...tetrisState,
+      viewCells: {
+        ...tetrisState.fixedCells,
+        ...tetrisState.activeBlock.cells
+      }
+    })
+  }, [tetrisState.activeBlock])
+
   return (
     <>
-      <TetrisView cells={tetrisState.cells} />
+      <TetrisView cells={tetrisState.viewCells} />
     </>
   )
 }
