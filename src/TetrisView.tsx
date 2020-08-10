@@ -1,5 +1,6 @@
 import * as React from 'react';
 import styled, { css } from 'styled-components';
+import { Controller } from './Controller'
 import { Cell } from './Cell';
 
 const TetrisViewBox = styled.div`
@@ -11,60 +12,7 @@ const Cells = styled.div`
   width: 400px;
 `;
 
-const Controler = styled.div`
-  display:flex;
-`
-const ArrowBox = styled.div`
-  display:flex;
-  flex-wrap: wrap;
-  align-items: center;
-  width:200px;
-  height:150px;
-`
-const UpperArrowBox = styled.div`
-  width:100%;
-  text-align:center;
-`
-const LeftArrowBox = styled.div`
-  width:50%;
-  text-align:center;
-`
-const RightArrowBox = styled.div`
-  width:50%;
-  text-align:center;
-`
-const UnderArrowBox = styled.div`
-  width:100%;
-  text-align:center;
-`
-const Arrow = css`
-  display:inline-block;
-  width:50px;
-  height:50px;
-  line-height:50px;
-  font-size:20px;
-  border: 1px solid #666;
-  border-radius: 10px;
-  box-sizing: border-box;
-`
-const UpperArrow = styled.a`
-  ${Arrow}
-`
-const LeftArrow = styled.a`
-  ${Arrow}
-`
-const RightArrow = styled.a`
-  ${Arrow}
-`
-const UnderArrow = styled.a`
-  ${Arrow}
-`
 
-const Button = css`
-  content: ''
-  width:100px;
-  height:40px;
-`
 interface CellPosY {
   exist: Boolean,
   backgroundColor: String
@@ -106,6 +54,13 @@ interface Cells {
 }
 interface TetrisViewProps {
   cells: Cells
+  clickEvent: {
+    moveLeft: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    moveRight: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    moveBottom: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    startGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    spin: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+  }
 }
 
 const TetrisView = (props: TetrisViewProps) => {
@@ -126,22 +81,7 @@ const TetrisView = (props: TetrisViewProps) => {
       <Cells>
         {cellList}
       </Cells>
-      <Controler>
-        <ArrowBox>
-          <UpperArrowBox>
-            <UpperArrow>↑</UpperArrow>
-          </UpperArrowBox>
-          <LeftArrowBox>
-            <LeftArrow>←</LeftArrow>
-          </LeftArrowBox>
-          <RightArrowBox>
-            <RightArrow>→</RightArrow>
-          </RightArrowBox>
-          <UnderArrowBox>
-            <UnderArrow>↓</UnderArrow>
-          </UnderArrowBox>
-        </ArrowBox>
-      </Controler>
+      <Controller clickEvent={props.clickEvent} />
     </TetrisViewBox>
   )
 }

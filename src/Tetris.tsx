@@ -55,16 +55,11 @@ const blankCell: Cell = {
 }
 
 interface MovedBlock {
-  name: String,
   axisOfRotation: {
     x: number,
     y: number
   }
   cells: Object,
-  backgroundColor: String,
-}
-interface afterImageBlock {
-  cells: Object;
 }
 
 const Tetris = () => {
@@ -106,20 +101,10 @@ const Tetris = () => {
     if (tetrisState.activeBlock.name === 'square') return;
 
     let spinCellsOrigin = {};
-    const afterImageBlock: afterImageBlock = {
-      cells: {},
-    };
     for (let posXStr in tetrisState.activeBlock.cells) {
       for (let posYStr in tetrisState.activeBlock.cells[posXStr]) {
         const posX: number = Number(posXStr)
         const posY: number = Number(posYStr)
-        if (!afterImageBlock.cells.hasOwnProperty(posX)) {
-          afterImageBlock.cells[posX] = {};
-        }
-        if (!afterImageBlock.cells[posX].hasOwnProperty(posY)) {
-          afterImageBlock.cells[posX][posY] = {};
-        }
-        afterImageBlock.cells[posX][posY] = blankCell;
 
         if (!spinCellsOrigin.hasOwnProperty(posX - tetrisState.activeBlock.axisOfRotation.x)) {
           spinCellsOrigin[posX - tetrisState.activeBlock.axisOfRotation.x] = {}
@@ -147,7 +132,6 @@ const Tetris = () => {
     }
 
     let spinedCells = {}
-    let stickedX
     for (let posXStr in spinedCellsOrigin) {
       for (let posYStr in spinedCellsOrigin[posXStr]) {
         const posX: number = Number(posXStr)
@@ -165,7 +149,9 @@ const Tetris = () => {
 
     setTetrisState({
       ...tetrisState,
+      viewCells: deepMerge(tetrisState.fixedCells, tetrisState.activeBlock.cells),
       activeBlock: {
+        ...tetrisState.activeBlock,
         cells: spinedCells
       }
     })
@@ -194,16 +180,11 @@ const Tetris = () => {
     }
     // 移動
     const movedBlock: MovedBlock = {
-      name: tetrisState.activeBlock.name,
       axisOfRotation: {
         x: tetrisState.activeBlock.axisOfRotation.x + moveX,
         y: tetrisState.activeBlock.axisOfRotation.y + moveY
       },
-      cells: {},
-      backgroundColor: null
-    };
-    const afterImageBlock: afterImageBlock = {
-      cells: {},
+      cells: {}
     };
 
     for (let posXStr in tetrisState.activeBlock.cells) {
@@ -218,20 +199,16 @@ const Tetris = () => {
           movedBlock.cells[posX + moveX][posY + moveY] = {};
         }
         movedBlock.cells[posX + moveX][posY + moveY] = tetrisState.activeBlock.cells[posX][posY];
-
-        if (!afterImageBlock.cells.hasOwnProperty(posX)) {
-          afterImageBlock.cells[posX] = {};
-        }
-        if (!afterImageBlock.cells[posX].hasOwnProperty(posY)) {
-          afterImageBlock.cells[posX][posY] = {};
-        }
-        afterImageBlock.cells[posX][posY] = blankCell;
       }
     }
 
     setTetrisState({
       ...tetrisState,
-      activeBlock: movedBlock
+      viewCells: deepMerge(tetrisState.fixedCells, tetrisState.activeBlock.cells),
+      activeBlock: {
+        ...tetrisState.activeBlock,
+        ...movedBlock
+      }
     })
   }
 
@@ -273,63 +250,79 @@ const Tetris = () => {
   }
 
   const fixActiveBlock = (): void => {
-    const newFixedCells = deepMerge(tetrisState.fixedCells, tetrisState.activeBlock.cells)
-    setTetrisState({
-      ...tetrisState,
-      fixedCells: newFixedCells
-    })
-    putActiveBlock()
-  }
+    let newFixedCells = deepMerge(tetrisState.fixedCells, tetrisState.activeBlock.cells)
 
-  const judgeRemoveBlock = () => {
     for (let posXStr in tetrisState.activeBlock.cells) {
-      for (let posYStr in tetrisState.activeBlock.cells[posXStr]) {
-
-      }
+      Object.keys(tetrisState.activeBlock.cells[posXStr]).forEach((posYStr) => {
+        const posY: number = Number(posYStr)
+        if (judgeLineShouldRemove(posY, newFixedCells)) {
+          newFixedCells = removeLine(posY, newFixedCells)
+        }
+      })
     }
-  }
 
-  const moveBlockHorizontal = (e): void => {
-    if (e.key === 'ArrowLeft') moveActiveBlockIfCanMove('left')
-    if (e.key === 'ArrowRight') moveActiveBlockIfCanMove('right')
-    if (e.key === 'ArrowDown') moveActiveBlockIfCanMove('bottom')
-    if (e.key === ' ') spinActiveBlock();
-  }
-
-  useEffect(() => {
-    window.addEventListener('keydown', moveBlockHorizontal)
-    window.addEventListener('click', putActiveBlock)
-    return () => {
-      window.removeEventListener('keydown', moveBlockHorizontal)
-      window.removeEventListener('click', putActiveBlock)
-    }
-  }, [tetrisState.activeBlock])
-
-  useEffect(() => {
-    if (tetrisState.activeBlock) {
-      var timeoutId = setTimeout(() => {
-        moveActiveBlockIfCanMove('bottom');
-      }, 300)
-      return () => {
-        clearTimeout(timeoutId)
-      }
-    }
-  }, [tetrisState.activeBlock])
-
-  useEffect(() => {
     setTetrisState({
-      ...tetrisState,
-      viewCells: {
-        ...tetrisState.fixedCells,
-        ...tetrisState.activeBlock.cells
-      }
+      viewCells: deepMerge(newFixedCells, tetrisState.activeBlock.cells),
+      fixedCells: newFixedCells,
+      activeBlock: BlockCreator()
     })
-  }, [tetrisState.activeBlock])
+  }
+
+  const removeLine = (removePosY: number, judgedCells): Cells => {
+    console.log('remove')
+    const removedCells = getBlankCells();
+    for (let posXStr in judgedCells) {
+      for (let posYStr in judgedCells[posXStr]) {
+        const posX: number = Number(posXStr)
+        const posY: number = Number(posYStr)
+
+        if (posY === 0) {
+          continue;
+        }
+
+        if (posY > removePosY) {
+          removedCells[posX][posY] = judgedCells[posX][posY]
+        };
+
+        removedCells[posX][posY] = judgedCells[posX][posY - 1]
+      }
+    }
+    return deepMerge(judgedCells, removedCells)
+  }
+
+  const judgeLineShouldRemove = (posY, judgedCells): Boolean => {
+    for (let posXStr in judgedCells) {
+      const posX: number = Number(posXStr)
+
+      if (!judgedCells[posX][posY].exist) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  useEffect(() => {
+    if (!tetrisState.activeBlock) return
+
+    var timeoutId = setTimeout(() => {
+      moveActiveBlockIfCanMove('bottom');
+    }, 300)
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [tetrisState])
 
   return (
-    <>
-      <TetrisView cells={tetrisState.viewCells} />
-    </>
+    <TetrisView
+      cells={tetrisState.viewCells}
+      clickEvent={{
+        moveLeft: () => { moveActiveBlockIfCanMove('left') },
+        moveRight: () => { moveActiveBlockIfCanMove('right') },
+        moveBottom: () => { moveActiveBlockIfCanMove('bottom') },
+        startGame: putActiveBlock,
+        spin: spinActiveBlock
+      }}
+    />
   )
 }
 

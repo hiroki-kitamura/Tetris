@@ -54,7 +54,7 @@ interface Cell {
   backgroundColor: String
 }
 export const BlockCreator = () => {
-  const randomNumber = Math.floor(Math.random() * 6) // 0から6の値
+  const randomNumber = Math.floor(Math.random() * 7) // 0から6の値
   let selectedBlock;
 
   switch (randomNumber) {
@@ -89,7 +89,6 @@ export const BlockCreator = () => {
       y: null
     },
     cells: {},
-    backgroundColor: ''
   }
   const cell: Cell = {
     exist: true,
