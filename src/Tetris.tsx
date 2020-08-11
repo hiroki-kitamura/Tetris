@@ -54,7 +54,8 @@ const blankCell: Cell = {
   backgroundColor: 'gray'
 }
 
-interface MovedBlock {
+interface Block {
+  name: String,
   axisOfRotation: {
     x: number,
     y: number
@@ -100,61 +101,65 @@ const Tetris = () => {
   const spinActiveBlock = () => {
     if (tetrisState.activeBlock.name === 'square') return;
 
-    let spinCellsOrigin = {};
-    for (let posXStr in tetrisState.activeBlock.cells) {
-      for (let posYStr in tetrisState.activeBlock.cells[posXStr]) {
+    let spinBlockOrigin = shiftBlockPos(tetrisState.activeBlock, -tetrisState.activeBlock.axisOfRotation.x, -tetrisState.activeBlock.axisOfRotation.y);
+
+    let spinedBlockOrigin
+    for (let posXStr in spinBlockOrigin.cells) {
+      for (let posYStr in spinBlockOrigin.cells[posXStr]) {
         const posX: number = Number(posXStr)
         const posY: number = Number(posYStr)
 
-        if (!spinCellsOrigin.hasOwnProperty(posX - tetrisState.activeBlock.axisOfRotation.x)) {
-          spinCellsOrigin[posX - tetrisState.activeBlock.axisOfRotation.x] = {}
+        if (!spinBlockOrigin.hasOwnProperty(-posY)) {
+          spinedBlockOrigin[-posY] = {}
         }
-        if (!spinCellsOrigin[posX - tetrisState.activeBlock.axisOfRotation.x].hasOwnProperty(posY - tetrisState.activeBlock.axisOfRotation.y)) {
-          spinCellsOrigin[posX - tetrisState.activeBlock.axisOfRotation.x][posY - tetrisState.activeBlock.axisOfRotation.y] = tetrisState.activeBlock.cells[posX][posY]
+        if (!spinBlockOrigin[-posY].hasOwnProperty(posX)) {
+          spinedBlockOrigin[-posY][posX] = {}
         }
+        spinedBlockOrigin[-posY][posX] = spinBlockOrigin.cells[posX][posY]
       }
     }
+    let spinedBlock = shiftBlockPos(tetrisState.activeBlock, -tetrisState.activeBlock.axisOfRotation.x, -tetrisState.activeBlock.axisOfRotation.y);
 
-    let spinedCellsOrigin = {}
-    for (let posXStr in spinCellsOrigin) {
-      for (let posYStr in spinCellsOrigin[posXStr]) {
-        const posX: number = Number(posXStr)
-        const posY: number = Number(posYStr)
-
-        if (!spinedCellsOrigin.hasOwnProperty(-posY)) {
-          spinedCellsOrigin[-posY] = {}
-        }
-        if (!spinedCellsOrigin[-posY].hasOwnProperty(posX)) {
-          spinedCellsOrigin[-posY][posX] = {}
-        }
-        spinedCellsOrigin[-posY][posX] = spinCellsOrigin[posX][posY]
-      }
-    }
-
-    let spinedCells = {}
-    for (let posXStr in spinedCellsOrigin) {
-      for (let posYStr in spinedCellsOrigin[posXStr]) {
-        const posX: number = Number(posXStr)
-        const posY: number = Number(posYStr)
-
-        if (!spinedCells.hasOwnProperty(posX + tetrisState.activeBlock.axisOfRotation.x)) {
-          spinedCells[posX + tetrisState.activeBlock.axisOfRotation.x] = {}
-        }
-        if (!spinedCells[posX + tetrisState.activeBlock.axisOfRotation.x].hasOwnProperty(posY + tetrisState.activeBlock.axisOfRotation.y)) {
-          spinedCells[posX + tetrisState.activeBlock.axisOfRotation.x][posY + tetrisState.activeBlock.axisOfRotation.y] = {}
-        }
-        spinedCells[posX + tetrisState.activeBlock.axisOfRotation.x][posY + tetrisState.activeBlock.axisOfRotation.y] = spinedCellsOrigin[posX][posY]
-      }
-    }
+    spinedBlock = shiftBlockIfStickout(spinedBlock)
+    spinedBlock = shiftBlockIfStickout(spinedBlock)
+    spinedBlock = shiftBlockIfOverlaping(spinedBlock)
 
     setTetrisState({
       ...tetrisState,
-      viewCells: deepMerge(tetrisState.fixedCells, tetrisState.activeBlock.cells),
+      viewCells: deepMerge(tetrisState.fixedCells, spinedBlock.cells),
       activeBlock: {
         ...tetrisState.activeBlock,
-        cells: spinedCells
+        ...spinedBlock
       }
     })
+  }
+
+  const shiftBlockPos = (shiftBlock: Block, addX: number, addY: number): Block => {
+    const shiftedBlock = {
+      name: shiftBlock.name,
+      axisOfRotation: {
+        x: null,
+        y: null
+      },
+      cells: {}
+    }
+    for (let posXStr in shiftBlock.cells) {
+      for (let posYStr in shiftBlock.cells[posXStr]) {
+        const posX: number = Number(posXStr)
+        const posY: number = Number(posYStr)
+
+        if (!shiftedBlock.cells.hasOwnProperty(posX + addX)) {
+          shiftedBlock.cells[posX + addX] = {}
+        }
+        if (!shiftedBlock.cells[posX + addX].hasOwnProperty(posY + addY)) {
+          shiftedBlock.cells[posX + addX][posY + addY] = {}
+        }
+        shiftedBlock.cells[posX + addX][posY + addY] = shiftBlock.cells[posX][posY]
+      }
+    }
+    shiftedBlock.axisOfRotation.x = shiftBlock.axisOfRotation.x + addX
+    shiftedBlock.axisOfRotation.y = shiftBlock.axisOfRotation.y + addY
+    return shiftedBlock
   }
 
   const moveActiveBlockIfCanMove = (direction: 'left' | 'right' | 'bottom'): void => {
@@ -178,29 +183,8 @@ const Tetris = () => {
         }
         break
     }
-    // 移動
-    const movedBlock: MovedBlock = {
-      axisOfRotation: {
-        x: tetrisState.activeBlock.axisOfRotation.x + moveX,
-        y: tetrisState.activeBlock.axisOfRotation.y + moveY
-      },
-      cells: {}
-    };
 
-    for (let posXStr in tetrisState.activeBlock.cells) {
-      for (let posYStr in tetrisState.activeBlock.cells[posXStr]) {
-        const posX: number = Number(posXStr)
-        const posY: number = Number(posYStr)
-
-        if (!movedBlock.cells.hasOwnProperty(posX + moveX)) {
-          movedBlock.cells[posX + moveX] = {};
-        }
-        if (!movedBlock.cells[posX + moveX].hasOwnProperty(posY + moveY)) {
-          movedBlock.cells[posX + moveX][posY + moveY] = {};
-        }
-        movedBlock.cells[posX + moveX][posY + moveY] = tetrisState.activeBlock.cells[posX][posY];
-      }
-    }
+    const movedBlock = shiftBlockPos(tetrisState.activeBlock, moveX, moveY)
 
     setTetrisState({
       ...tetrisState,
@@ -210,6 +194,77 @@ const Tetris = () => {
         ...movedBlock
       }
     })
+  }
+
+  const shiftBlockIfStickout = (shiftBlock: Block) => {
+    let shiftedBlock = {
+      name: shiftBlock.name,
+      axisOfRotation: shiftBlock.axisOfRotation,
+      cells: {},
+    }
+    const overlapPos = {
+      x: 0,
+      y: 0
+    }
+    for (let posXStr in shiftBlock.cells) {
+      for (let posYStr in shiftBlock.cells[posXStr]) {
+        const posX: number = Number(posXStr)
+        const posY: number = Number(posYStr)
+        if (posX >= colNumber) {
+          if (Math.abs(overlapPos.x) > Math.abs(colNumber - posX - 1)) overlapPos.x = colNumber - posX - 1
+        }
+        if (posX < 0) {
+          if (Math.abs(overlapPos.x) > Math.abs(colNumber - posX - 1)) overlapPos.x = colNumber - posX - 1
+        }
+        if (posY >= rowNumber) {
+          if (Math.abs(overlapPos.y) > Math.abs(colNumber - posY - 1)) overlapPos.y = rowNumber - posY - 1
+        }
+        if (posY < 0) {
+          if (Math.abs(overlapPos.y) > Math.abs(colNumber - posY - 1)) overlapPos.y = 0 - posY
+        }
+      }
+      shiftedBlock = shiftBlockPos(shiftBlock, overlapPos.x, overlapPos.y)
+
+      return shiftedBlock
+    }
+  }
+
+
+  const shiftBlockIfOverlaping = (shiftBlock: Block) => {
+    let shiftedBlock = {
+      name: shiftBlock.name,
+      axisOfRotation: shiftBlock.axisOfRotation,
+      cells: {},
+    }
+    const overlapPos = {
+      x: 0,
+      y: 0
+    }
+    for (let posXStr in shiftBlock.cells) {
+      for (let posYStr in shiftBlock.cells[posXStr]) {
+        const posX: number = Number(posXStr)
+        const posY: number = Number(posYStr)
+        if (tetrisState.fixedCells[posX][posY].exist) {
+          if (Math.abs(posX) > Math.abs(overlapPos.x)) {
+            if (posX > shiftBlock.axisOfRotation.x) {
+              overlapPos.x = shiftBlock.axisOfRotation.x - posX
+            } else {
+              overlapPos.y = shiftBlock.axisOfRotation.y - posY
+            }
+          }
+          if (Math.abs(posY) > Math.abs(overlapPos.y)) {
+            if (posY > shiftBlock.axisOfRotation.y) {
+              overlapPos.y = -posY
+            } else {
+              overlapPos.y = posY
+            }
+          }
+        }
+      }
+    }
+    shiftedBlock = shiftBlockPos(shiftBlock, overlapPos.x, overlapPos.y)
+
+    return shiftedBlock
   }
 
   const canMoveActiveBlockToX = (direction: number): Boolean => {
@@ -269,22 +324,20 @@ const Tetris = () => {
   }
 
   const removeLine = (removePosY: number, judgedCells): Cells => {
-    console.log('remove')
     const removedCells = getBlankCells();
     for (let posXStr in judgedCells) {
       for (let posYStr in judgedCells[posXStr]) {
         const posX: number = Number(posXStr)
         const posY: number = Number(posYStr)
+        {
+          if (posY === 0) continue;
 
-        if (posY === 0) {
-          continue;
+          if (posY > removePosY) {
+            removedCells[posX][posY] = judgedCells[posX][posY]
+          };
+
+          removedCells[posX][posY] = judgedCells[posX][posY - 1]
         }
-
-        if (posY > removePosY) {
-          removedCells[posX][posY] = judgedCells[posX][posY]
-        };
-
-        removedCells[posX][posY] = judgedCells[posX][posY - 1]
       }
     }
     return deepMerge(judgedCells, removedCells)
@@ -293,12 +346,11 @@ const Tetris = () => {
   const judgeLineShouldRemove = (posY, judgedCells): Boolean => {
     for (let posXStr in judgedCells) {
       const posX: number = Number(posXStr)
-
-      if (!judgedCells[posX][posY].exist) {
-        return false;
+      {
+        if (!judgedCells[posX][posY].exist) return false;
       }
+      return true;
     }
-    return true;
   }
 
   useEffect(() => {

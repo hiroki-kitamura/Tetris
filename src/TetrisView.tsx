@@ -69,9 +69,7 @@ const TetrisView = (props: TetrisViewProps) => {
   for (let y in props.cells[0]) {
     for (let x in props.cells) {
       cellList.push(
-        <Cell theme={{ backgroundColor: props.cells[x][y]['backgroundColor'] }} key={i} >
-          {x}, {y}
-        </Cell>
+        <Cell theme={{ backgroundColor: props.cells[x][y]['backgroundColor'] }} key={i} />
       )
       i++
     }
