@@ -37,6 +37,7 @@
     "deepmerge": "^4.2.2",
     "eslint": "^7.6.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
+    "file-loader": "^6.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }

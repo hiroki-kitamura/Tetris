@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 
 const Controler = styled.div`
   display:flex;
+  flex-wrap:wrap;
 `
 const ArrowBox = styled.div`
   display:flex;
@@ -38,39 +39,51 @@ const Arrow = css`
   box-sizing: border-box;
   cursor: pointer;
 `
-const UpperArrow = styled.a`
+const UpperArrow = styled.button`
   ${Arrow}
 `
-const LeftArrow = styled.a`
+const LeftArrow = styled.button`
   ${Arrow}
 `
-const RightArrow = styled.a`
+const RightArrow = styled.button`
   ${Arrow}
 `
-const UnderArrow = styled.a`
+const UnderArrow = styled.button`
   ${Arrow}
 `
+const ButtonBox = styled.div`
 
+`
 const Button = css`
-  content: ''
   width:100px;
   height:40px;
   cursor: pointer;
 `
-const StartButton = styled.button`
-  ${Button}
-`
-
 const SpinButton = styled.button`
   ${Button}
 `
-
+const StartButton = styled.button`
+  ${Button}
+  margin-left: 10px;
+`
+const ResetButton = styled.button`
+  ${Button}
+  margin-left: 10px;
+`
+const MuteButton = styled.button`
+  ${Button}
+  margin-left: 10px;
+`
 interface ControllerProps {
+  isPlay: boolean,
+  mute: boolean,
   clickEvent: {
     moveLeft: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     moveRight: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     moveBottom: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     startGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    resetGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    toggleMuteAudio: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     spin: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
   }
 }
@@ -80,20 +93,24 @@ export const Controller = (props: ControllerProps) => {
     <Controler>
       <ArrowBox>
         <UpperArrowBox>
-          <UpperArrow>↑</UpperArrow>
+          <UpperArrow disabled={props.isPlay ? false : true}>↑</UpperArrow>
         </UpperArrowBox>
         <LeftArrowBox>
-          <LeftArrow onClick={props.clickEvent.moveLeft}>←</LeftArrow>
+          <LeftArrow onClick={props.clickEvent.moveLeft} disabled={props.isPlay ? false : true}>←</LeftArrow>
         </LeftArrowBox>
         <RightArrowBox>
-          <RightArrow onClick={props.clickEvent.moveRight}>→</RightArrow>
+          <RightArrow onClick={props.clickEvent.moveRight} disabled={props.isPlay ? false : true}>→</RightArrow>
         </RightArrowBox>
         <UnderArrowBox>
-          <UnderArrow onClick={props.clickEvent.moveBottom}>↓</UnderArrow>
+          <UnderArrow onClick={props.clickEvent.moveBottom} disabled={props.isPlay ? false : true}>↓</UnderArrow>
         </UnderArrowBox>
       </ArrowBox>
-      <StartButton onClick={props.clickEvent.startGame}>START!</StartButton>
-      <SpinButton onClick={props.clickEvent.spin}>Spin</SpinButton>
+      <ButtonBox>
+        <SpinButton onClick={props.clickEvent.spin} disabled={props.isPlay ? false : true}>Spin</SpinButton>
+        <StartButton onClick={props.clickEvent.startGame} disabled={props.isPlay ? true : false}>Start!</StartButton>
+        <ResetButton onClick={props.clickEvent.resetGame} disabled={props.isPlay ? false : true}>Reset!</ResetButton>
+        <MuteButton onClick={props.clickEvent.toggleMuteAudio}>{props.mute ? 'Audio Off' : 'Audio On'}</MuteButton>
+      </ButtonBox>
     </Controler>
   )
 }

@@ -5,13 +5,13 @@ import { BlockCreator } from './BlockCreator'
 const deepMerge = require('deepmerge')
 
 interface Cell {
-  exist: Boolean,
-  backgroundColor: String
+  exist: boolean,
+  backgroundColor: string
 }
 
 interface CellPosY {
-  exist: Boolean,
-  backgroundColor: String
+  exist: boolean,
+  backgroundColor: string
 }
 
 interface CellPosX {
@@ -52,17 +52,18 @@ interface Cells {
 
 const blankCell: Cell = {
   exist: false,
-  backgroundColor: 'gray'
+  backgroundColor: 'black'
 }
 
 interface Block {
-  name: String,
+  name: string,
   axisOfRotation: {
     x: number,
     y: number
   }
   cells: Object,
 }
+
 const colNumber: number = 10;
 const rowNumber: number = 20;
 
@@ -82,18 +83,20 @@ const getBlankCells = (): Cells => {
   const cells: Cells = preCells
   return cells
 }
-
-const shiftBlockPos = (shiftBlock: Block, addX: number, addY: number): Block => {
+const mergeCells = (baseCells: Cells, overwriteCells): Cells => {
+  return deepMerge(baseCells, overwriteCells)
+}
+const shiftBlockPos = (targetBlock: Block, addX: number, addY: number): Block => {
   const shiftedBlock = {
-    name: shiftBlock.name,
+    name: targetBlock.name,
     axisOfRotation: {
       x: null,
       y: null
     },
     cells: {}
   }
-  for (let posXStr in shiftBlock.cells) {
-    for (let posYStr in shiftBlock.cells[posXStr]) {
+  for (let posXStr in targetBlock.cells) {
+    for (let posYStr in targetBlock.cells[posXStr]) {
       const posX: number = Number(posXStr)
       const posY: number = Number(posYStr)
 
@@ -103,26 +106,26 @@ const shiftBlockPos = (shiftBlock: Block, addX: number, addY: number): Block => 
       if (!shiftedBlock.cells[posX + addX].hasOwnProperty(posY + addY)) {
         shiftedBlock.cells[posX + addX][posY + addY] = {}
       }
-      shiftedBlock.cells[posX + addX][posY + addY] = shiftBlock.cells[posX][posY]
+      shiftedBlock.cells[posX + addX][posY + addY] = targetBlock.cells[posX][posY]
     }
   }
-  shiftedBlock.axisOfRotation.x = shiftBlock.axisOfRotation.x + addX
-  shiftedBlock.axisOfRotation.y = shiftBlock.axisOfRotation.y + addY
+  shiftedBlock.axisOfRotation.x = targetBlock.axisOfRotation.x + addX
+  shiftedBlock.axisOfRotation.y = targetBlock.axisOfRotation.y + addY
   return shiftedBlock
 }
 
-const shiftBlockIfStickout = (shiftBlock: Block): Block => {
+const shiftBlockIfStickout = (targetBlock: Block): Block => {
   let shiftedBlock = {
-    name: shiftBlock.name,
-    axisOfRotation: shiftBlock.axisOfRotation,
+    name: targetBlock.name,
+    axisOfRotation: targetBlock.axisOfRotation,
     cells: {},
   }
   const overlapPos = {
     x: 0,
     y: 0
   }
-  for (let posXStr in shiftBlock.cells) {
-    for (let posYStr in shiftBlock.cells[posXStr]) {
+  for (let posXStr in targetBlock.cells) {
+    for (let posYStr in targetBlock.cells[posXStr]) {
       const posX: number = Number(posXStr)
       const posY: number = Number(posYStr)
       if (posX >= colNumber) {
@@ -138,15 +141,15 @@ const shiftBlockIfStickout = (shiftBlock: Block): Block => {
         if (Math.abs(overlapPos.y) < Math.abs(posY)) overlapPos.y = - posY
       }
     }
-    shiftedBlock = shiftBlockPos(shiftBlock, overlapPos.x, overlapPos.y)
+    shiftedBlock = shiftBlockPos(targetBlock, overlapPos.x, overlapPos.y)
   }
   return shiftedBlock
 }
 
-const shiftBlockIfOverlaping = (fixedCells: Cells, shiftedBlock: Block, shiftBlock: Block): Block => {
+const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, preTargetBlock: Block): Block => {
   let noOverlapingBlock = {
-    name: shiftedBlock.name,
-    axisOfRotation: shiftedBlock.axisOfRotation,
+    name: targetBlock.name,
+    axisOfRotation: targetBlock.axisOfRotation,
     cells: {},
   }
   const overlapPos = {
@@ -154,15 +157,15 @@ const shiftBlockIfOverlaping = (fixedCells: Cells, shiftedBlock: Block, shiftBlo
     y: 0
   }
   let pierceFlg = false;
-  for (let posXStr in shiftedBlock.cells) {
+  for (let posXStr in targetBlock.cells) {
     if (pierceFlg) overlapPos.x = overlapPos.x * 2;
 
-    for (let posYStr in shiftedBlock.cells[posXStr]) {
+    for (let posYStr in targetBlock.cells[posXStr]) {
       const posX: number = Number(posXStr)
       const posY: number = Number(posYStr)
 
       if (fixedCells[posX][posY].exist) {
-        if (shiftBlock.axisOfRotation.x - posX > 0) {
+        if (preTargetBlock.axisOfRotation.x - posX > 0) {
           overlapPos.x = overlapPos.x ? overlapPos.x : 1;
           pierceFlg = true
         } else {
@@ -170,24 +173,24 @@ const shiftBlockIfOverlaping = (fixedCells: Cells, shiftedBlock: Block, shiftBlo
           pierceFlg = true
         }
 
-        if (posX === shiftBlock.axisOfRotation.x) {
+        if (posX === preTargetBlock.axisOfRotation.x) {
           if (Math.abs(posY) > Math.abs(overlapPos.y)) {
-            if (posY > shiftedBlock.axisOfRotation.y) {
-              overlapPos.y = shiftedBlock.axisOfRotation.y - posY
+            if (posY > targetBlock.axisOfRotation.y) {
+              overlapPos.y = targetBlock.axisOfRotation.y - posY
             } else {
-              overlapPos.y = posY - shiftedBlock.axisOfRotation.y
+              overlapPos.y = posY - targetBlock.axisOfRotation.y
             }
           }
         }
       }
     }
   }
-  noOverlapingBlock = shiftBlockPos(shiftedBlock, overlapPos.x, overlapPos.y)
+  noOverlapingBlock = shiftBlockPos(targetBlock, overlapPos.x, overlapPos.y)
 
   return noOverlapingBlock
 }
 
-const spinActiveBlock = (fixedCells: Cells, spinBlock: Block) => {
+const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
   if (spinBlock.name === 'square') return spinBlock;
 
   let spinedBlockOrigin: Block = {
@@ -226,7 +229,7 @@ const spinActiveBlock = (fixedCells: Cells, spinBlock: Block) => {
   return spinedBlock
 }
 
-const shouldFixActiveBlock = (activeBlock, fixedCells): Boolean => {
+const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
   for (let posXStr in activeBlock.cells) {
     for (let posYStr in activeBlock.cells[posXStr]) {
       const posX: number = Number(posXStr)
@@ -251,7 +254,7 @@ const removeColIfFulledCol = (fixedCells: Cells): Cells => {
   return newFixedCells
 }
 
-const extractColShouldRemove = (fixedCells: Cells) => {
+const extractColShouldRemove = (fixedCells: Cells): Array<number> => {
   const removeColList = []
   for (let posYStr in fixedCells[0]) {
     const posY: number = Number(posYStr)
@@ -295,16 +298,30 @@ const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
   return true
 }
 
+const scoreCalculater = (removeColNumber: number) => {
+  switch (removeColNumber) {
+    case 1:
+      return 1
+    case 2:
+      return 3
+    case 3:
+      return 10
+    case 4:
+      return 20
+  }
+}
+const audio = new Audio('src/korobushka.wav')
 
 const reducer = (tetrisState, action) => {
   switch (action.type) {
     case 'putActiveBlock':
-      const newBlock = BlockCreator();
 
       return {
         ...tetrisState,
-        viewCells: deepMerge(tetrisState.fixedCells, newBlock.cells),
-        activeBlock: newBlock
+        viewCells: mergeCells(tetrisState.fixedCells, tetrisState.nextBlock.cells),
+        activeBlock: tetrisState.nextBlock,
+        nextBlock: BlockCreator(),
+        isPlay: true
       }
     case 'shiftActiveBlockLeft':
       let leftShiftedBlock = shiftBlockPos(tetrisState.activeBlock, -1, 0)
@@ -313,7 +330,7 @@ const reducer = (tetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: deepMerge(tetrisState.fixedCells, leftShiftedBlock.cells),
+        viewCells: mergeCells(tetrisState.fixedCells, leftShiftedBlock.cells),
         activeBlock: leftShiftedBlock
       }
     case 'shiftActiveBlockRight':
@@ -323,33 +340,62 @@ const reducer = (tetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: deepMerge(tetrisState.fixedCells, rightShiftedBlock.cells),
+        viewCells: mergeCells(tetrisState.fixedCells, rightShiftedBlock.cells),
         activeBlock: rightShiftedBlock
       }
-    case 'shiftActiveBlockUnder':
+    case 'dropOrFix':
       let shiftedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
       let newFixedCells = null;
-      let newActiveBlock = null
+      let newActiveBlock = null;
+      let newNextBlock;
+      let newScore = null
+
       if (shouldFixActiveBlock(shiftedActiveBlock, tetrisState.fixedCells)) {
-        newFixedCells = deepMerge(tetrisState.fixedCells, shiftedActiveBlock.cells)
-        newFixedCells = removeColIfFulledCol(newFixedCells)
-        newActiveBlock = BlockCreator()
+        let mergedCells = mergeCells(tetrisState.fixedCells, shiftedActiveBlock.cells)
+        let removeColList = extractColShouldRemove(mergedCells)
+
+        newScore = scoreCalculater(removeColList.length) + tetrisState.score
+        newFixedCells = removeColIfFulledCol(mergedCells)
+        newActiveBlock = tetrisState.nextBlock;
+        newNextBlock = BlockCreator();
       }
 
       return {
         ...tetrisState,
-        viewCells: deepMerge(tetrisState.fixedCells, shiftedActiveBlock.cells),
+        viewCells: mergeCells(tetrisState.fixedCells, shiftedActiveBlock.cells),
         fixedCells: newFixedCells ? newFixedCells : tetrisState.fixedCells,
-        activeBlock: newActiveBlock ? newActiveBlock : shiftedActiveBlock
+        activeBlock: newActiveBlock ? newActiveBlock : shiftedActiveBlock,
+        nextBlock: newNextBlock ? newNextBlock : tetrisState.nextBlock,
+        score: newScore ? newScore : tetrisState.score
       }
     case 'spinActiveBlock':
       const spinedBlock = spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
 
-
       return {
         ...tetrisState,
-        viewCells: deepMerge(tetrisState.fixedCells, spinedBlock.cells),
+        viewCells: mergeCells(tetrisState.fixedCells, spinedBlock.cells),
         activeBlock: spinedBlock
+      }
+    case 'resetGame':
+      return {
+        ...tetrisState,
+        viewCells: getBlankCells(),
+        fixedCells: getBlankCells(),
+        activeBlock: null,
+        nextBlock: BlockCreator(),
+        score: 0,
+        isPlay: false,
+        dropSpeed: 1000
+      }
+    case 'acceleDropSpeed':
+      return {
+        ...tetrisState,
+        dropSpeed: tetrisState.dropSpeed * 0.95
+      }
+    case 'toggleAudioMute':
+      return {
+        ...tetrisState,
+        mute: !tetrisState.mute
       }
     default: return tetrisState
   }
@@ -358,28 +404,61 @@ const Tetris = () => {
   const [tetrisState, dispatch] = useReducer(reducer, {
     viewCells: getBlankCells(),
     fixedCells: getBlankCells(),
-    activeBlock: null
+    activeBlock: null,
+    nextBlock: BlockCreator(),
+    dropSpeed: 1000,
+    score: 0,
+    mute: true,
+    isPlay: false,
+    gameOver: false
   })
 
   useEffect(() => {
     if (!tetrisState.activeBlock) return
 
     var timeoutId = setTimeout(() => {
-      dispatch({ type: 'shiftActiveBlockUnder' })
-    }, 300)
+      dispatch({ type: 'dropOrFix' })
+      console.log(tetrisState.dropSpeed)
+    }, tetrisState.dropSpeed)
     return () => {
       clearTimeout(timeoutId)
     }
   }, [tetrisState.activeBlock])
 
+  useEffect(() => {
+    if (tetrisState.isPlay === true) {
+      audio.play()
+      audio.loop = true;
+    } else {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, [tetrisState.isPlay])
+
+  useEffect(() => {
+    setInterval(() => {
+      dispatch({ type: 'acceleDropSpeed' })
+    }, 3000);
+  }, [])
+
+  audio.muted = tetrisState.mute
   return (
     <TetrisView
-      cells={tetrisState.viewCells}
+      viewCells={tetrisState.viewCells}
+      score={tetrisState.score}
+      nextBlock={{
+        name: tetrisState.nextBlock.name,
+        cells: tetrisState.nextBlock.cells
+      }}
+      isPlay={tetrisState.isPlay}
+      mute={tetrisState.mute}
       clickEvent={{
         moveLeft: () => { dispatch({ type: 'shiftActiveBlockLeft' }) },
         moveRight: () => { dispatch({ type: 'shiftActiveBlockRight' }) },
-        moveBottom: () => { dispatch({ type: 'shiftActiveBlockUnder' }) },
+        moveBottom: () => { dispatch({ type: 'dropOrFix' }) },
         startGame: () => { dispatch({ type: 'putActiveBlock' }) },
+        resetGame: () => { dispatch({ type: 'resetGame' }) },
+        toggleMuteAudio: () => { dispatch({ type: 'toggleAudioMute' }) },
         spin: () => { dispatch({ type: 'spinActiveBlock' }) },
       }}
     />

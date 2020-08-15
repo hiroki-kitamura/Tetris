@@ -20,14 +20,14 @@ const straightBlock: Block = {
 }
 const lBlock: Block = {
   name: 'l',
-  axisOfRotation: [0, 1],
-  cells: [[0, 0], [1, 0], [0, 1], [0, 2]],
+  axisOfRotation: [1, 0],
+  cells: [[0, 0], [1, 0], [2, 0], [0, 1]],
   backgroundColor: 'blue'
 };
 const reLBlock: Block = {
   name: 'reL',
-  axisOfRotation: [1, 1],
-  cells: [[0, 0], [1, 0], [1, 1], [1, 2]],
+  axisOfRotation: [1, 0],
+  cells: [[0, 0], [1, 0], [2, 0], [2, 1]],
   backgroundColor: 'orange'
 };
 const zigzagBlock: Block = {
@@ -37,7 +37,7 @@ const zigzagBlock: Block = {
   backgroundColor: 'red'
 };
 const reZigzagBlock: Block = {
-  name: 'reZingzag',
+  name: 'reZigzag',
   axisOfRotation: [1, 1],
   cells: [[0, 1], [1, 1], [1, 0], [2, 0]],
   backgroundColor: 'green'
