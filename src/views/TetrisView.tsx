@@ -30,7 +30,7 @@ interface TetrisViewProps {
     moveBottom: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     startGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     resetGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
-    toggleMuteAudio: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    toggleAudioMute: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     spin: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
   }
 }

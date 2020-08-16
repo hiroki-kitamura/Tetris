@@ -421,7 +421,7 @@ export const Tetris = () => {
         moveBottom: () => { dispatch({ type: 'dropOrFix' }) },
         startGame: () => { dispatch({ type: 'putActiveBlock' }) },
         resetGame: () => { dispatch({ type: 'resetGame' }) },
-        toggleMuteAudio: () => { dispatch({ type: 'toggleAudioMute' }) },
+        toggleAudioMute: () => { dispatch({ type: 'toggleAudioMute' }) },
         spin: () => { dispatch({ type: 'spinActiveBlock' }) },
       }}
     />

@@ -83,7 +83,7 @@ interface ControllerProps {
     moveBottom: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     startGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     resetGame: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
-    toggleMuteAudio: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
+    toggleAudioMute: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     spin: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
   }
 }
@@ -109,7 +109,7 @@ export const Controller = (props: ControllerProps) => {
         <SpinButton onClick={props.clickEvent.spin} disabled={props.isPlay ? false : true}>Spin</SpinButton>
         <StartButton onClick={props.clickEvent.startGame} disabled={props.isPlay ? true : false}>Start!</StartButton>
         <ResetButton onClick={props.clickEvent.resetGame} disabled={props.isPlay ? false : true}>Reset!</ResetButton>
-        <MuteButton onClick={props.clickEvent.toggleMuteAudio}>{props.mute ? 'Audio Off' : 'Audio On'}</MuteButton>
+        <MuteButton onClick={props.clickEvent.toggleAudioMute}>{props.mute ? 'Audio Off' : 'Audio On'}</MuteButton>
       </ButtonBox>
     </Controler>
   )
