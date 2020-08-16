@@ -40,7 +40,11 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'] // importする時、拡張子を無視できるリスト
+    modules: [
+      path.resolve(__dirname, 'src'),
+      'node_modules'
+    ],
+    extensions: ['.js', '.jsx', '.ts', '.tsx'], // importする時、拡張子を無視できるリスト
   },
 
   plugins: [
