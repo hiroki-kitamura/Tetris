@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { Tetris } from './Tetris';
+import { Tetris } from 'pages/Tetris';
 
 const App = () => {
   return <Tetris />

@@ -1,86 +1,47 @@
 import * as React from 'react';
 import { useEffect, useReducer } from 'react';
-import { TetrisView } from './TetrisView';
-import { BlockCreator } from './BlockCreator'
+import { TetrisView } from 'views/TetrisView';
+import { BlockCreator } from 'functions/BlockCreator'
+const path = require('path');
+const src = path.resolve(__dirname, 'src');
 const deepMerge = require('deepmerge')
 
 interface Cell {
   exist: boolean,
   backgroundColor: string
 }
-
-interface CellPosY {
-  exist: boolean,
-  backgroundColor: string
-}
-
-interface CellPosX {
-  0: CellPosY,
-  1: CellPosY,
-  2: CellPosY,
-  3: CellPosY,
-  4: CellPosY,
-  5: CellPosY,
-  6: CellPosY,
-  7: CellPosY,
-  8: CellPosY,
-  9: CellPosY,
-  10: CellPosY,
-  11: CellPosY,
-  12: CellPosY,
-  13: CellPosY,
-  14: CellPosY,
-  15: CellPosY,
-  16: CellPosY,
-  17: CellPosY,
-  18: CellPosY,
-  19: CellPosY,
-}
-
 interface Cells {
-  0: CellPosX,
-  1: CellPosX,
-  2: CellPosX,
-  3: CellPosX,
-  4: CellPosX,
-  5: CellPosX,
-  6: CellPosX,
-  7: CellPosX,
-  8: CellPosX,
-  9: CellPosX,
+  [index: string]: {
+    [index: string]: Cell
+  },
 }
-
-const blankCell: Cell = {
-  exist: false,
-  backgroundColor: 'black'
-}
-
 interface Block {
   name: string,
   axisOfRotation: {
     x: number,
     y: number
   }
-  cells: Object,
+  cells: Cells,
 }
 
 const colNumber: number = 10;
 const rowNumber: number = 20;
+const blankCell: Cell = {
+  exist: false,
+  backgroundColor: 'black'
+}
 
 const getBlankCells = (): Cells => {
-  let preCells;
-  preCells = {}
+  let cells = {}
 
   for (let x = 0; x < colNumber; x++) {
-    preCells[x] = {}
-  }
-  for (let x = 0; x < colNumber; x++) {
+    cells[x] = {}
+
     for (let y = 0; y < rowNumber; y++) {
-      preCells[x][y] = blankCell
+      cells[x][y] = blankCell
     }
   }
 
-  const cells: Cells = preCells
   return cells
 }
 const mergeCells = (baseCells: Cells, overwriteCells): Cells => {
@@ -213,9 +174,8 @@ const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
         spinedBlockOrigin.cells[-posY] = {}
       }
       if (!spinedBlockOrigin.cells[-posY].hasOwnProperty(posX)) {
-        spinedBlockOrigin.cells[-posY][posX] = {}
+        spinedBlockOrigin.cells[-posY][posX] = spinBlockOrigin.cells[posX][posY]
       }
-      spinedBlockOrigin.cells[-posY][posX] = spinBlockOrigin.cells[posX][posY]
     }
   }
 
@@ -310,7 +270,8 @@ const scoreCalculater = (removeColNumber: number) => {
       return 20
   }
 }
-const audio = new Audio('src/korobushka.wav')
+
+const audio = new Audio(`${src}/assets/korobushka.wav`)
 
 const reducer = (tetrisState, action) => {
   switch (action.type) {
@@ -392,6 +353,14 @@ const reducer = (tetrisState, action) => {
         ...tetrisState,
         dropSpeed: tetrisState.dropSpeed * 0.95
       }
+    case 'toggleAudioPlay':
+      if (tetrisState.isPlay === true) {
+        audio.play()
+        audio.loop = true;
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+      }
     case 'toggleAudioMute':
       return {
         ...tetrisState,
@@ -400,7 +369,7 @@ const reducer = (tetrisState, action) => {
     default: return tetrisState
   }
 }
-const Tetris = () => {
+export const Tetris = () => {
   const [tetrisState, dispatch] = useReducer(reducer, {
     viewCells: getBlankCells(),
     fixedCells: getBlankCells(),
@@ -418,21 +387,15 @@ const Tetris = () => {
 
     var timeoutId = setTimeout(() => {
       dispatch({ type: 'dropOrFix' })
-      console.log(tetrisState.dropSpeed)
     }, tetrisState.dropSpeed)
+
     return () => {
       clearTimeout(timeoutId)
     }
   }, [tetrisState.activeBlock])
 
   useEffect(() => {
-    if (tetrisState.isPlay === true) {
-      audio.play()
-      audio.loop = true;
-    } else {
-      audio.pause();
-      audio.currentTime = 0;
-    }
+    dispatch({ type: 'toggleAudioPlay' })
   }, [tetrisState.isPlay])
 
   useEffect(() => {
@@ -464,5 +427,3 @@ const Tetris = () => {
     />
   )
 }
-
-export { Tetris }
