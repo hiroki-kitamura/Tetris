@@ -273,6 +273,13 @@ const scoreCalculater = (removeColNumber: number) => {
 
 const audio = new Audio(`${src}/assets/korobushka.wav`)
 
+const isGameOver = (fixedCells: Cells): boolean => {
+  for (let posXStr in fixedCells) {
+    const posX: number = Number(posXStr)
+    if (fixedCells[posX][1].exist === true) return true
+  }
+}
+
 const reducer = (tetrisState, action) => {
   switch (action.type) {
     case 'putActiveBlock':
@@ -304,30 +311,53 @@ const reducer = (tetrisState, action) => {
         viewCells: mergeCells(tetrisState.fixedCells, rightShiftedBlock.cells),
         activeBlock: rightShiftedBlock
       }
-    case 'dropOrFix':
-      let shiftedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
-      let newFixedCells = null;
-      let newActiveBlock = null;
-      let newNextBlock;
-      let newScore = null
+    case 'dropOrFixOrGameOver':
+      let action
+      let dropedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
 
-      if (shouldFixActiveBlock(shiftedActiveBlock, tetrisState.fixedCells)) {
-        let mergedCells = mergeCells(tetrisState.fixedCells, shiftedActiveBlock.cells)
-        let removeColList = extractColShouldRemove(mergedCells)
-
-        newScore = scoreCalculater(removeColList.length) + tetrisState.score
-        newFixedCells = removeColIfFulledCol(mergedCells)
-        newActiveBlock = tetrisState.nextBlock;
-        newNextBlock = BlockCreator();
+      if (isGameOver(tetrisState.fixedCells)) {
+        action = 'gameOver'
+      } else if (shouldFixActiveBlock(dropedActiveBlock, tetrisState.fixedCells)) {
+        action = 'fix'
+      } else {
+        action = 'drop'
       }
 
-      return {
-        ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, shiftedActiveBlock.cells),
-        fixedCells: newFixedCells ? newFixedCells : tetrisState.fixedCells,
-        activeBlock: newActiveBlock ? newActiveBlock : shiftedActiveBlock,
-        nextBlock: newNextBlock ? newNextBlock : tetrisState.nextBlock,
-        score: newScore ? newScore : tetrisState.score
+      switch (action) {
+        case 'gameOver':
+          return {
+            ...tetrisState,
+            activeBlock: null,
+            isGameOver: true,
+            isPlay: false,
+          }
+        case 'fix':
+          let newFixedCells = null;
+          let newActiveBlock = null;
+          let newNextBlock;
+          let newScore = null
+          let mergedCells = mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells)
+          let removeColList = extractColShouldRemove(mergedCells)
+
+          newScore = scoreCalculater(removeColList.length) + tetrisState.score
+          newFixedCells = removeColIfFulledCol(mergedCells)
+          newActiveBlock = tetrisState.nextBlock;
+          newNextBlock = BlockCreator();
+          return {
+            ...tetrisState,
+            viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
+            fixedCells: newFixedCells,
+            activeBlock: newActiveBlock,
+            nextBlock: newNextBlock,
+            score: newScore
+          }
+        case 'drop':
+          return {
+            ...tetrisState,
+            viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
+            fixedCells: tetrisState.fixedCells,
+            activeBlock: dropedActiveBlock,
+          }
       }
     case 'spinActiveBlock':
       const spinedBlock = spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
@@ -346,6 +376,7 @@ const reducer = (tetrisState, action) => {
         nextBlock: BlockCreator(),
         score: 0,
         isPlay: false,
+        isGameOver: false,
         dropSpeed: 1000
       }
     case 'acceleDropSpeed':
@@ -361,10 +392,13 @@ const reducer = (tetrisState, action) => {
         audio.pause();
         audio.currentTime = 0;
       }
+      return {
+        ...tetrisState
+      }
     case 'toggleAudioMute':
       return {
         ...tetrisState,
-        mute: !tetrisState.mute
+        isMute: !tetrisState.isMute
       }
     default: return tetrisState
   }
@@ -377,16 +411,16 @@ export const Tetris = () => {
     nextBlock: BlockCreator(),
     dropSpeed: 1000,
     score: 0,
-    mute: true,
+    isMute: true,
     isPlay: false,
-    gameOver: false
+    isGameOver: false
   })
 
   useEffect(() => {
     if (!tetrisState.activeBlock) return
 
     var timeoutId = setTimeout(() => {
-      dispatch({ type: 'dropOrFix' })
+      dispatch({ type: 'dropOrFixOrGameOver' })
     }, tetrisState.dropSpeed)
 
     return () => {
@@ -404,7 +438,7 @@ export const Tetris = () => {
     }, 3000);
   }, [])
 
-  audio.muted = tetrisState.mute
+  audio.muted = tetrisState.isMute
   return (
     <TetrisView
       viewCells={tetrisState.viewCells}
@@ -413,12 +447,13 @@ export const Tetris = () => {
         name: tetrisState.nextBlock.name,
         cells: tetrisState.nextBlock.cells
       }}
+      isGameOver={tetrisState.isGameOver}
       isPlay={tetrisState.isPlay}
-      mute={tetrisState.mute}
+      isMute={tetrisState.isMute}
       clickEvent={{
         moveLeft: () => { dispatch({ type: 'shiftActiveBlockLeft' }) },
         moveRight: () => { dispatch({ type: 'shiftActiveBlockRight' }) },
-        moveBottom: () => { dispatch({ type: 'dropOrFix' }) },
+        moveBottom: () => { dispatch({ type: 'dropOrFixOrGameOver' }) },
         startGame: () => { dispatch({ type: 'putActiveBlock' }) },
         resetGame: () => { dispatch({ type: 'resetGame' }) },
         toggleAudioMute: () => { dispatch({ type: 'toggleAudioMute' }) },

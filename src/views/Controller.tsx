@@ -76,7 +76,8 @@ const MuteButton = styled.button`
 `
 interface ControllerProps {
   isPlay: boolean,
-  mute: boolean,
+  isGameOver: boolean,
+  isMute: boolean,
   clickEvent: {
     moveLeft: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     moveRight: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
@@ -88,6 +89,18 @@ interface ControllerProps {
   }
 }
 export const Controller = (props: ControllerProps) => {
+  let isResetDisabled
+  let isStartDisabled
+  if (props.isGameOver) {
+    isStartDisabled = true;
+    isResetDisabled = false;
+  } else if (props.isPlay) {
+    isStartDisabled = true;
+    isResetDisabled = false;
+  } else if (!props.isPlay) {
+    isStartDisabled = false;
+    isResetDisabled = true;
+  }
 
   return (
     <Controler>
@@ -107,10 +120,10 @@ export const Controller = (props: ControllerProps) => {
       </ArrowBox>
       <ButtonBox>
         <SpinButton onClick={props.clickEvent.spin} disabled={props.isPlay ? false : true}>Spin</SpinButton>
-        <StartButton onClick={props.clickEvent.startGame} disabled={props.isPlay ? true : false}>Start!</StartButton>
-        <ResetButton onClick={props.clickEvent.resetGame} disabled={props.isPlay ? false : true}>Reset!</ResetButton>
-        <MuteButton onClick={props.clickEvent.toggleAudioMute}>{props.mute ? 'Audio Off' : 'Audio On'}</MuteButton>
+        <StartButton onClick={props.clickEvent.startGame} disabled={isStartDisabled}>Start!</StartButton>
+        <ResetButton onClick={props.clickEvent.resetGame} disabled={isResetDisabled}>Reset!</ResetButton>
+        <MuteButton onClick={props.clickEvent.toggleAudioMute}>{props.isMute ? 'Audio Off' : 'Audio On'}</MuteButton>
       </ButtonBox>
-    </Controler>
+    </Controler >
   )
 }

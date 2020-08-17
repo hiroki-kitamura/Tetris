@@ -5,10 +5,25 @@ const deepMerge = require('deepmerge')
 
 const CellsView = styled.div`
   display: flex;
+  position:relative;
   flex-wrap: wrap;
   width: 400px;
   border: 1px solid black;
 `;
+interface GameOverProps {
+  isGameOver: boolean
+}
+const GameOver = styled.div<GameOverProps>`
+  position: absolute;
+  top: 100px;
+  display: ${(props) => props.isGameOver ? 'block' : 'none'};
+  width:100%;
+  line-height:50px;
+  font-size:40px;
+  text-align: center;
+  background-color:red;
+  color: black;
+`
 
 const StatusView = styled.div`
   width:160px;
@@ -43,6 +58,7 @@ const NextBlockView = styled.div`
   width:120px;
   margin:0 auto;
 `
+
 
 interface Cells {
   [index: number]: {
@@ -125,6 +141,7 @@ interface ScreenProps {
     name: string,
     cells: Cells
   }
+  isGameOver: boolean,
   score: number,
 }
 
@@ -136,6 +153,7 @@ export const Screen = (props: ScreenProps): JSX.Element => {
     <ScreenBox>
       <CellsView>
         {viewCells}
+        <GameOver isGameOver={props.isGameOver}>Game Over</GameOver>
       </CellsView>
       <StatusView>
         <NextBlockView>

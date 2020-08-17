@@ -23,7 +23,8 @@ interface TetrisViewProps {
   },
   score: number,
   isPlay: boolean,
-  mute: boolean,
+  isGameOver: boolean,
+  isMute: boolean,
   clickEvent: {
     moveLeft: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
     moveRight: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
@@ -38,8 +39,8 @@ interface TetrisViewProps {
 export const TetrisView = (props: TetrisViewProps) => {
   return (
     <TetrisViewBox>
-      <Screen viewCells={props.viewCells} nextBlock={props.nextBlock} score={props.score} />
-      <Controller clickEvent={props.clickEvent} isPlay={props.isPlay} mute={props.mute} />
+      <Screen viewCells={props.viewCells} nextBlock={props.nextBlock} isGameOver={props.isGameOver} score={props.score} />
+      <Controller clickEvent={props.clickEvent} isPlay={props.isPlay} isGameOver={props.isGameOver} isMute={props.isMute} />
     </TetrisViewBox>
   )
 }
