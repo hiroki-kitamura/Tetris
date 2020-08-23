@@ -113,7 +113,6 @@ const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
 
   let [axisOfRotationX, axisOfRotationY] = getPosNumber(spinBlock.axisOfRotation)
   let spinBlockOrigin = shiftBlockPos(spinBlock, -axisOfRotationX, -axisOfRotationY);
-  console.log(spinBlockOrigin)
 
   for (let XY in spinBlockOrigin.cells) {
     let [X, Y] = getPosNumber(XY)
@@ -125,9 +124,7 @@ const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
     }
   }
 
-  console.log(spinedBlockOrigin)
   let spinedBlock = shiftBlockPos(spinedBlockOrigin, axisOfRotationX, axisOfRotationY);
-  console.log(spinedBlock)
   spinedBlock = shiftBlockIfStickout(spinedBlock)
   spinedBlock = shiftBlockIfOverlaping(fixedCells, spinedBlock, spinBlock)
 
