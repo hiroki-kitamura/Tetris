@@ -1,6 +1,8 @@
 import * as React from 'react';
 import styled, { css } from 'styled-components';
 import { Cell, NextCell } from 'views/Cell';
+import { Cells } from 'interface/common'
+import { getPosNumber } from 'functions/PositionShifter'
 const deepMerge = require('deepmerge')
 
 const CellsView = styled.div`
@@ -59,16 +61,6 @@ const NextBlockView = styled.div`
   margin:0 auto;
 `
 
-
-interface Cells {
-  [index: number]: {
-    [index: number]: {
-      exist: Boolean,
-      backgroundColor: String
-    }
-  },
-}
-
 interface NextBlock {
   name: string,
   cells: Cells
@@ -78,11 +70,8 @@ const makeBlankSquareCells = (colNumber: number) => {
   let cells = {}
   let startCol = 4
   for (let x = startCol; x < startCol + colNumber; x++) {
-    cells[x] = {}
-  }
-  for (let x = startCol; x < startCol + colNumber; x++) {
     for (let y = 0; y < colNumber; y++) {
-      cells[x][y] = {
+      cells[`${x},${y}`] = {
         exist: true,
         backgroundColor: 'black'
       };
@@ -93,10 +82,10 @@ const makeBlankSquareCells = (colNumber: number) => {
 const viewCellsCreator = (cells): Array<JSX.Element> => {
   const cellList = []
   let i = 0
-  for (let y in cells[0]) {
-    for (let x in cells) {
+  for (let y = 0; y < 20; y++) {
+    for (let x = 0; x < 10; x++) {
       cellList.push(
-        <Cell backgroundColor={cells[x][y]['backgroundColor']} key={i} />
+        <Cell backgroundColor={cells[`${x},${y}`]['backgroundColor']} key={i} />
       )
       i++
     }
@@ -124,13 +113,12 @@ const NextBlockCellsCreator = (nextBlock: NextBlock): Array<JSX.Element> => {
   let cellList = []
   let i = 0
 
-  for (let y in nextBlockCells[4]) {
-    for (let x in nextBlockCells) {
-      cellList.push(
-        <NextCell name={nextBlock.name} backgroundColor={nextBlockCells[x][y]['backgroundColor']} key={i} />
-      )
-      i++
-    }
+  for (let XY in nextBlockCells) {
+    const [X, Y] = getPosNumber(XY)
+    cellList.push(
+      <NextCell name={nextBlock.name} backgroundColor={nextBlockCells[`${X},${Y}`]['backgroundColor']} key={i} />
+    )
+    i++
   }
   return cellList
 }

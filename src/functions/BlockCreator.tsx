@@ -1,59 +1,51 @@
-interface Block {
-  name: String
-  cells: Array<[Number, Number]>,
-  axisOfRotation: Array<Number>,
-  backgroundColor: String;
-}
+import { Cells, Cell, Block } from 'interface/common'
+import { getAddedPos, getPosNumber } from 'functions/PositionShifter'
 
-const squareBlock: Block = {
+const squareBlock = {
   name: 'square',
-  axisOfRotation: [1, 1],
+  axisOfRotation: '1,1',
   cells: [[0, 0], [1, 0], [0, 1], [1, 1]],
 
   backgroundColor: 'yellow'
 };
-const straightBlock: Block = {
+const straightBlock = {
   name: 'straight',
-  axisOfRotation: [2, 0],
+  axisOfRotation: '2,0',
   cells: [[0, 0], [1, 0], [2, 0], [3, 0]],
   backgroundColor: 'aqua'
 }
-const lBlock: Block = {
+const lBlock = {
   name: 'l',
-  axisOfRotation: [1, 0],
+  axisOfRotation: '1,0',
   cells: [[0, 0], [1, 0], [2, 0], [0, 1]],
   backgroundColor: 'blue'
 };
-const reLBlock: Block = {
+const reLBlock = {
   name: 'reL',
-  axisOfRotation: [1, 0],
+  axisOfRotation: '1,0',
   cells: [[0, 0], [1, 0], [2, 0], [2, 1]],
   backgroundColor: 'orange'
 };
-const zigzagBlock: Block = {
+const zigzagBlock = {
   name: 'zigzag',
-  axisOfRotation: [1, 1],
+  axisOfRotation: '1,1',
   cells: [[0, 0], [1, 0], [1, 1], [2, 1]],
   backgroundColor: 'red'
 };
-const reZigzagBlock: Block = {
+const reZigzagBlock = {
   name: 'reZigzag',
-  axisOfRotation: [1, 1],
+  axisOfRotation: '1,1',
   cells: [[0, 1], [1, 1], [1, 0], [2, 0]],
   backgroundColor: 'green'
 };
-const tBlock: Block = {
+const tBlock = {
   name: 't',
-  axisOfRotation: [1, 0],
+  axisOfRotation: '1,0',
   cells: [[0, 0], [1, 0], [1, 1], [2, 0]],
   backgroundColor: 'purple'
 };
 
-interface Cell {
-  exist: Boolean,
-  backgroundColor: String
-}
-export const BlockCreator = () => {
+export const BlockCreator = (): Block => {
   const randomNumber = Math.floor(Math.random() * 7) // 0から6の値
   let selectedBlock;
 
@@ -84,10 +76,7 @@ export const BlockCreator = () => {
   const centerCol = 4
   const block = {
     name: '',
-    axisOfRotation: {
-      x: null,
-      y: null
-    },
+    axisOfRotation: null,
     cells: {},
   }
   const cell: Cell = {
@@ -97,21 +86,16 @@ export const BlockCreator = () => {
 
   block.name = selectedBlock.name
 
-  block.axisOfRotation.x = selectedBlock.axisOfRotation[0] + centerCol
-  block.axisOfRotation.y = selectedBlock.axisOfRotation[1]
+  let axisOfRotation = getAddedPos(selectedBlock.axisOfRotation, centerCol, 0)
+
+  block.axisOfRotation = axisOfRotation
+
   selectedBlock.cells.forEach(pos => {
-    let posX = Number(pos[0])
-    const posY = Number(pos[1])
-    posX = posX + centerCol;
+    const X = Number(pos[0])
+    const Y = Number(pos[1])
 
-    if (block.cells[posX] === undefined) {
-      block.cells[posX] = {};
-      if (block.cells[posX][posY] === undefined) {
-        block.cells[posX][posY] = {};
-      }
-    }
-
-    block.cells[posX][posY] = cell;
+    block.cells[`${X + centerCol},${Y}`] = cell;
   })
+
   return block
 }

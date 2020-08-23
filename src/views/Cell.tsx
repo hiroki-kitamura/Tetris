@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Cell as CellInterface } from 'interface/common'
 
 interface CellProps {
   name?: string,

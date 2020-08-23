@@ -1,28 +1,13 @@
 import * as React from 'react';
 import { useEffect, useReducer } from 'react';
 import { TetrisView } from 'views/TetrisView';
+import { Cells, Cell, Block } from 'interface/common'
 import { BlockCreator } from 'functions/BlockCreator'
+import { getAddedPos, getPosNumber, shiftBlockPos } from 'functions/PositionShifter'
 const path = require('path');
 const src = path.resolve(__dirname, 'src');
 const deepMerge = require('deepmerge')
 
-interface Cell {
-  exist: boolean,
-  backgroundColor: string
-}
-interface Cells {
-  [index: string]: {
-    [index: string]: Cell
-  },
-}
-interface Block {
-  name: string,
-  axisOfRotation: {
-    x: number,
-    y: number
-  }
-  cells: Cells,
-}
 
 const colNumber: number = 10;
 const rowNumber: number = 20;
@@ -35,118 +20,83 @@ const getBlankCells = (): Cells => {
   let cells = {}
 
   for (let x = 0; x < colNumber; x++) {
-    cells[x] = {}
-
     for (let y = 0; y < rowNumber; y++) {
-      cells[x][y] = blankCell
+      cells[`${x},${y}`] = blankCell
     }
   }
 
   return cells
 }
+
 const mergeCells = (baseCells: Cells, overwriteCells): Cells => {
   return deepMerge(baseCells, overwriteCells)
-}
-const shiftBlockPos = (targetBlock: Block, addX: number, addY: number): Block => {
-  const shiftedBlock = {
-    name: targetBlock.name,
-    axisOfRotation: {
-      x: null,
-      y: null
-    },
-    cells: {}
-  }
-  for (let posXStr in targetBlock.cells) {
-    for (let posYStr in targetBlock.cells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
-
-      if (!shiftedBlock.cells.hasOwnProperty(posX + addX)) {
-        shiftedBlock.cells[posX + addX] = {}
-      }
-      if (!shiftedBlock.cells[posX + addX].hasOwnProperty(posY + addY)) {
-        shiftedBlock.cells[posX + addX][posY + addY] = {}
-      }
-      shiftedBlock.cells[posX + addX][posY + addY] = targetBlock.cells[posX][posY]
-    }
-  }
-  shiftedBlock.axisOfRotation.x = targetBlock.axisOfRotation.x + addX
-  shiftedBlock.axisOfRotation.y = targetBlock.axisOfRotation.y + addY
-  return shiftedBlock
 }
 
 const shiftBlockIfStickout = (targetBlock: Block): Block => {
   let shiftedBlock = {
-    name: targetBlock.name,
-    axisOfRotation: targetBlock.axisOfRotation,
+    ...targetBlock,
     cells: {},
   }
-  const overlapPos = {
-    x: 0,
-    y: 0
-  }
-  for (let posXStr in targetBlock.cells) {
-    for (let posYStr in targetBlock.cells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
-      if (posX >= colNumber) {
-        if (Math.abs(overlapPos.x) < Math.abs(colNumber - posX - 1)) overlapPos.x = colNumber - posX - 1
-      }
-      if (posX < 0) {
-        if (Math.abs(overlapPos.x) < Math.abs(posX)) overlapPos.x = - posX
-      }
-      if (posY >= rowNumber) {
-        if (Math.abs(overlapPos.y) < Math.abs(colNumber - posY - 1)) overlapPos.y = rowNumber - posY - 1
-      }
-      if (posY < 0) {
-        if (Math.abs(overlapPos.y) < Math.abs(posY)) overlapPos.y = - posY
-      }
+
+  let overlapX = 0;
+  let overlapY = 0;
+  for (let XY in targetBlock.cells) {
+    let [X, Y] = getPosNumber(XY)
+    if (X >= colNumber) {
+      if (Math.abs(overlapX) < Math.abs(colNumber - X - 1)) overlapX = colNumber - X - 1
     }
-    shiftedBlock = shiftBlockPos(targetBlock, overlapPos.x, overlapPos.y)
+    if (X < 0) {
+      if (Math.abs(overlapX) < Math.abs(X)) overlapX = - X
+    }
+    if (Y >= rowNumber) {
+      if (Math.abs(overlapY) < Math.abs(colNumber - Y - 1)) overlapY = rowNumber - Y - 1
+    }
+    if (Y < 0) {
+      if (Math.abs(overlapY) < Math.abs(Y)) overlapY = - Y
+    }
   }
+  shiftedBlock = shiftBlockPos(targetBlock, overlapX, overlapY)
   return shiftedBlock
 }
 
 const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, preTargetBlock: Block): Block => {
+
   let noOverlapingBlock = {
-    name: targetBlock.name,
-    axisOfRotation: targetBlock.axisOfRotation,
+    ...targetBlock,
     cells: {},
   }
-  const overlapPos = {
-    x: 0,
-    y: 0
-  }
+  let overlapX = 0;
+  let overlapY = 0;
   let pierceFlg = false;
-  for (let posXStr in targetBlock.cells) {
-    if (pierceFlg) overlapPos.x = overlapPos.x * 2;
 
-    for (let posYStr in targetBlock.cells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
+  for (let XY in targetBlock.cells) {
+    if (pierceFlg) overlapX = overlapX * 2;
 
-      if (fixedCells[posX][posY].exist) {
-        if (preTargetBlock.axisOfRotation.x - posX > 0) {
-          overlapPos.x = overlapPos.x ? overlapPos.x : 1;
-          pierceFlg = true
-        } else {
-          overlapPos.x = overlapPos.x ? overlapPos.x : -1;
-          pierceFlg = true
-        }
+    let [X, Y] = getPosNumber(XY)
+    let [axisOfRotationX, axisOfRotationY] = getPosNumber(targetBlock.axisOfRotation)
+    let [preAxisOfRotationX, preAxisOfRotationY] = getPosNumber(preTargetBlock.axisOfRotation)
 
-        if (posX === preTargetBlock.axisOfRotation.x) {
-          if (Math.abs(posY) > Math.abs(overlapPos.y)) {
-            if (posY > targetBlock.axisOfRotation.y) {
-              overlapPos.y = targetBlock.axisOfRotation.y - posY
-            } else {
-              overlapPos.y = posY - targetBlock.axisOfRotation.y
-            }
+    if (fixedCells[XY].exist) {
+      if (preAxisOfRotationX - X > 0) {
+        overlapX = overlapX ? overlapX : 1;
+        pierceFlg = true
+      } else {
+        overlapX = overlapX ? overlapX : -1;
+        pierceFlg = true
+      }
+
+      if (X === axisOfRotationX) {
+        if (Math.abs(Y) > Math.abs(overlapY)) {
+          if (Y > preAxisOfRotationY) {
+            overlapY = axisOfRotationY - Y
+          } else {
+            overlapY = Y - axisOfRotationY
           }
         }
       }
     }
   }
-  noOverlapingBlock = shiftBlockPos(targetBlock, overlapPos.x, overlapPos.y)
+  noOverlapingBlock = shiftBlockPos(targetBlock, overlapX, overlapY)
 
   return noOverlapingBlock
 }
@@ -154,52 +104,47 @@ const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, preTarget
 const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
   if (spinBlock.name === 'square') return spinBlock;
 
+
   let spinedBlockOrigin: Block = {
     ...spinBlock,
-    axisOfRotation: {
-      x: 0,
-      y: 0
-    },
+    axisOfRotation: '0,0',
     cells: {}
   }
 
-  let spinBlockOrigin = shiftBlockPos(spinBlock, -spinBlock.axisOfRotation.x, -spinBlock.axisOfRotation.y);
+  let [axisOfRotationX, axisOfRotationY] = getPosNumber(spinBlock.axisOfRotation)
+  let spinBlockOrigin = shiftBlockPos(spinBlock, -axisOfRotationX, -axisOfRotationY);
+  console.log(spinBlockOrigin)
 
-  for (let posXStr in spinBlockOrigin.cells) {
-    for (let posYStr in spinBlockOrigin.cells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
+  for (let XY in spinBlockOrigin.cells) {
+    let [X, Y] = getPosNumber(XY)
+    let spinedX = -Y
+    let spinedY = X
 
-      if (!spinedBlockOrigin.cells.hasOwnProperty(-posY)) {
-        spinedBlockOrigin.cells[-posY] = {}
-      }
-      if (!spinedBlockOrigin.cells[-posY].hasOwnProperty(posX)) {
-        spinedBlockOrigin.cells[-posY][posX] = spinBlockOrigin.cells[posX][posY]
-      }
+    if (!spinedBlockOrigin.cells.hasOwnProperty(`${spinedX},${spinedY}`)) {
+      spinedBlockOrigin.cells[`${spinedX},${spinedY}`] = spinBlockOrigin.cells[XY]
     }
   }
 
-  let spinedBlock = shiftBlockPos(spinedBlockOrigin, spinBlock.axisOfRotation.x, spinBlock.axisOfRotation.y);
-
+  console.log(spinedBlockOrigin)
+  let spinedBlock = shiftBlockPos(spinedBlockOrigin, axisOfRotationX, axisOfRotationY);
+  console.log(spinedBlock)
   spinedBlock = shiftBlockIfStickout(spinedBlock)
   spinedBlock = shiftBlockIfOverlaping(fixedCells, spinedBlock, spinBlock)
 
   if (!canExistBlock(fixedCells, spinedBlock)) return spinBlock
-
   return spinedBlock
 }
 
 const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
-  for (let posXStr in activeBlock.cells) {
-    for (let posYStr in activeBlock.cells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
-      // 一番下に落ちた時
-      if (posY === rowNumber - 1) return true
-      // 下にブロックがある時
-      if (!activeBlock.cells[posX].hasOwnProperty(posY + 1) && fixedCells[posX][posY + 1].exist === true)
-        return true;
-    }
+  for (let XY in activeBlock.cells) {
+
+    let [X, Y] = getPosNumber(XY)
+
+    // 一番下に落ちた時
+    if (Y === rowNumber - 1) return true
+    // 下にブロックがある時
+    if (!activeBlock.cells.hasOwnProperty(`${X},${Y + 1}`) && fixedCells[`${X},${Y + 1}`].exist === true)
+      return true;
   }
   return false
 }
@@ -208,52 +153,45 @@ const removeColIfFulledCol = (fixedCells: Cells): Cells => {
   const removeColList = extractColShouldRemove(fixedCells)
 
   let newFixedCells = fixedCells;
-  removeColList.forEach((removePosY) => {
-    newFixedCells = removeCol(removePosY, newFixedCells)
+  removeColList.forEach((removeY) => {
+    newFixedCells = removeCol(removeY, newFixedCells)
   })
   return newFixedCells
 }
 
 const extractColShouldRemove = (fixedCells: Cells): Array<number> => {
   const removeColList = []
-  for (let posYStr in fixedCells[0]) {
-    const posY: number = Number(posYStr)
+
+  for (let Y = 0; Y < rowNumber; Y++) {
     let removeFlg = true;
-    for (let posXStr in fixedCells) {
-      const posX: number = Number(posXStr)
-      if (!fixedCells[posX][posY].exist) removeFlg = false;
+    for (let X = 0; X < colNumber; X++) {
+      if (!fixedCells[`${X},${Y}`].exist) removeFlg = false;
     }
-    if (removeFlg) removeColList.push(posY)
+    if (removeFlg) removeColList.push(Y)
   }
   return removeColList;
 }
 
-const removeCol = (removePosY: number, fixedCells: Cells): Cells => {
+const removeCol = (removeY: number, fixedCells: Cells): Cells => {
   const removedCells = getBlankCells();
-  for (let posXStr in fixedCells) {
-    for (let posYStr in fixedCells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
-      if (posY === 0) continue;
+  for (let XY in fixedCells) {
+    let [X, Y] = getPosNumber(XY)
+    if (Y === 0) continue;
 
-      if (posY > removePosY) removedCells[posX][posY] = fixedCells[posX][posY]
+    if (Y > removeY) removedCells[XY] = fixedCells[XY]
 
-      removedCells[posX][posY] = fixedCells[posX][posY - 1]
-    }
+    removedCells[XY] = fixedCells[`${X},${Y - 1}`]
   }
   return removedCells
 }
 
 const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
-  for (let posXStr in block.cells) {
-    for (let posYStr in block.cells[posXStr]) {
-      const posX: number = Number(posXStr)
-      const posY: number = Number(posYStr)
+  for (let XY in block.cells) {
+    let [X, Y] = getPosNumber(XY)
 
-      if (posX < 0 || posX >= colNumber || posY < 0 || posY >= rowNumber) return false
+    if (X < 0 || X >= colNumber || Y < 0 || Y >= rowNumber) return false
 
-      if (fixedCells[posX][posY].exist) return false
-    }
+    if (fixedCells[XY].exist) return false
   }
   return true
 }
@@ -274,9 +212,10 @@ const scoreCalculater = (removeColNumber: number) => {
 const audio = new Audio(`${src}/assets/korobushka.wav`)
 
 const isGameOver = (fixedCells: Cells): boolean => {
-  for (let posXStr in fixedCells) {
-    const posX: number = Number(posXStr)
-    if (fixedCells[posX][1].exist === true) return true
+  for (let XY in fixedCells) {
+    let [X, Y] = getPosNumber(XY)
+
+    if (fixedCells[`${X},1`].exist === true) return true
   }
 }
 
@@ -314,7 +253,6 @@ const reducer = (tetrisState, action) => {
     case 'dropOrFixOrGameOver':
       let action
       let dropedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
-
       if (isGameOver(tetrisState.fixedCells)) {
         action = 'gameOver'
       } else if (shouldFixActiveBlock(dropedActiveBlock, tetrisState.fixedCells)) {

@@ -1,19 +1,12 @@
 import * as React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { Controller } from './Controller'
 import { Screen } from 'views/Screen'
+import { Cells } from 'interface/common'
 
 const TetrisViewBox = styled.div`
   display: flex;
 `
-interface Cells {
-  [index: number]: {
-    [index: number]: {
-      exist: Boolean,
-      backgroundColor: String
-    }
-  },
-}
 
 interface TetrisViewProps {
   viewCells: Cells,
