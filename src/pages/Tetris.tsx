@@ -194,6 +194,8 @@ const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
 
 const scoreCalculater = (removeColNumber: number) => {
   switch (removeColNumber) {
+    case 0:
+      return 0
     case 1:
       return 1
     case 2:
