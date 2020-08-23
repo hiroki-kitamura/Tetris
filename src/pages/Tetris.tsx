@@ -215,6 +215,7 @@ const isGameOver = (fixedCells: Cells): boolean => {
 
     if (fixedCells[`${X},1`].exist === true) return true
   }
+  return false
 }
 
 const reducer = (tetrisState, action) => {
@@ -338,6 +339,7 @@ export const Tetris = () => {
   })
 
   const dropActiveBlockIfCanDrop = () => {
+    console.log(tetrisState)
     if (isGameOver(tetrisState.fixedCells)) {
       dispatch({ type: 'gameOver' })
     } else if (shouldFixActiveBlock(tetrisState.activeBlock, tetrisState.fixedCells)) {
@@ -347,14 +349,33 @@ export const Tetris = () => {
     }
   }
 
+  const windowKeyDownEvent = (e) => {
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'h':
+        dispatch({ type: 'shiftActiveBlockLeft' })
+        break;
+      case 'ArrowRight':
+      case 'l':
+        dispatch({ type: 'shiftActiveBlockRight' })
+        break;
+      case 'ArrowDown':
+      case 'j':
+        dropActiveBlockIfCanDrop()
+        break;
+    }
+  }
   useEffect(() => {
     if (!tetrisState.activeBlock) return
     var timeoutId = setTimeout(() => {
       dropActiveBlockIfCanDrop()
     }, tetrisState.dropSpeed)
 
+    window.addEventListener('keydown', windowKeyDownEvent)
+
     return () => {
       clearTimeout(timeoutId)
+      window.removeEventListener('keydown', windowKeyDownEvent)
     }
   }, [tetrisState.activeBlock])
 
@@ -366,7 +387,7 @@ export const Tetris = () => {
     setInterval(() => {
       dispatch({ type: 'acceleDropSpeed' })
     }, 3000);
-  }, [])
+  }, [tetrisState.ActiveBlock])
 
   audio.muted = tetrisState.isMute
   return (
