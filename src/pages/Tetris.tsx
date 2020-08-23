@@ -65,38 +65,37 @@ const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, preTarget
     ...targetBlock,
     cells: {},
   }
-  let overlapX = 0;
-  let overlapY = 0;
-  let pierceFlg = false;
+  let shiftX = 0;
+  let shiftY = 0;
+  let i = 0;
 
   for (let XY in targetBlock.cells) {
-    if (pierceFlg) overlapX = overlapX * 2;
 
     let [X, Y] = getPosNumber(XY)
     let [axisOfRotationX, axisOfRotationY] = getPosNumber(targetBlock.axisOfRotation)
     let [preAxisOfRotationX, preAxisOfRotationY] = getPosNumber(preTargetBlock.axisOfRotation)
 
     if (fixedCells[XY].exist) {
-      if (preAxisOfRotationX - X > 0) {
-        overlapX = overlapX ? overlapX : 1;
-        pierceFlg = true
+      if (preAxisOfRotationX > X) {
+        shiftX = 1
       } else {
-        overlapX = overlapX ? overlapX : -1;
-        pierceFlg = true
+        shiftX = -1
       }
+      if (targetBlock.name === 'straight' && i !== 1 && i !== 2) shiftX *= 2;
 
-      if (X === axisOfRotationX) {
-        if (Math.abs(Y) > Math.abs(overlapY)) {
+      if (X === preAxisOfRotationX) {
+        if (Math.abs(Y) > Math.abs(shiftY)) {
           if (Y > preAxisOfRotationY) {
-            overlapY = axisOfRotationY - Y
+            shiftY = axisOfRotationY - Y
           } else {
-            overlapY = Y - axisOfRotationY
+            shiftY = Y - axisOfRotationY
           }
         }
       }
     }
+    i++;
   }
-  noOverlapingBlock = shiftBlockPos(targetBlock, overlapX, overlapY)
+  noOverlapingBlock = shiftBlockPos(targetBlock, shiftX, shiftY)
 
   return noOverlapingBlock
 }
@@ -247,53 +246,38 @@ const reducer = (tetrisState, action) => {
         viewCells: mergeCells(tetrisState.fixedCells, rightShiftedBlock.cells),
         activeBlock: rightShiftedBlock
       }
-    case 'dropOrFixOrGameOver':
-      let action
+    case 'dropActiveBlock':
       let dropedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
-      if (isGameOver(tetrisState.fixedCells)) {
-        action = 'gameOver'
-      } else if (shouldFixActiveBlock(dropedActiveBlock, tetrisState.fixedCells)) {
-        action = 'fix'
-      } else {
-        action = 'drop'
+      return {
+        ...tetrisState,
+        viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
+        fixedCells: tetrisState.fixedCells,
+        activeBlock: dropedActiveBlock,
       }
+    case 'fixActiveBlock':
+      let mergedCells = mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells)
+      let newFixedCells = removeColIfFulledCol(mergedCells)
 
-      switch (action) {
-        case 'gameOver':
-          return {
-            ...tetrisState,
-            activeBlock: null,
-            isGameOver: true,
-            isPlay: false,
-          }
-        case 'fix':
-          let newFixedCells = null;
-          let newActiveBlock = null;
-          let newNextBlock;
-          let newScore = null
-          let mergedCells = mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells)
-          let removeColList = extractColShouldRemove(mergedCells)
+      let removeColList = extractColShouldRemove(mergedCells)
+      let newScore = scoreCalculater(removeColList.length) + tetrisState.score
 
-          newScore = scoreCalculater(removeColList.length) + tetrisState.score
-          newFixedCells = removeColIfFulledCol(mergedCells)
-          newActiveBlock = tetrisState.nextBlock;
-          newNextBlock = BlockCreator();
-          return {
-            ...tetrisState,
-            viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
-            fixedCells: newFixedCells,
-            activeBlock: newActiveBlock,
-            nextBlock: newNextBlock,
-            score: newScore
-          }
-        case 'drop':
-          return {
-            ...tetrisState,
-            viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
-            fixedCells: tetrisState.fixedCells,
-            activeBlock: dropedActiveBlock,
-          }
+      let newActiveBlock = tetrisState.nextBlock;
+      return {
+        ...tetrisState,
+        viewCells: mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells),
+        fixedCells: newFixedCells,
+        activeBlock: newActiveBlock,
+        nextBlock: BlockCreator(),
+        score: newScore
       }
+    case 'gameOver':
+      return {
+        ...tetrisState,
+        activeBlock: null,
+        isGameOver: true,
+        isPlay: false,
+      }
+    case 'dropOrFixOrGameOver':
     case 'spinActiveBlock':
       const spinedBlock = spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
 
@@ -351,11 +335,20 @@ export const Tetris = () => {
     isGameOver: false
   })
 
+  const dropActiveBlockIfCanDrop = () => {
+    if (isGameOver(tetrisState.fixedCells)) {
+      dispatch({ type: 'gameOver' })
+    } else if (shouldFixActiveBlock(tetrisState.activeBlock, tetrisState.fixedCells)) {
+      dispatch({ type: 'fixActiveBlock' })
+    } else {
+      dispatch({ type: 'dropActiveBlock' })
+    }
+  }
+
   useEffect(() => {
     if (!tetrisState.activeBlock) return
-
     var timeoutId = setTimeout(() => {
-      dispatch({ type: 'dropOrFixOrGameOver' })
+      dropActiveBlockIfCanDrop()
     }, tetrisState.dropSpeed)
 
     return () => {
@@ -388,7 +381,7 @@ export const Tetris = () => {
       clickEvent={{
         moveLeft: () => { dispatch({ type: 'shiftActiveBlockLeft' }) },
         moveRight: () => { dispatch({ type: 'shiftActiveBlockRight' }) },
-        moveBottom: () => { dispatch({ type: 'dropOrFixOrGameOver' }) },
+        moveBottom: () => dropActiveBlockIfCanDrop(),
         startGame: () => { dispatch({ type: 'putActiveBlock' }) },
         resetGame: () => { dispatch({ type: 'resetGame' }) },
         toggleAudioMute: () => { dispatch({ type: 'toggleAudioMute' }) },
