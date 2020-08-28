@@ -1,8 +1,8 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import { Controller } from './Controller'
-import { Screen } from 'views/Screen'
-import { Cells } from 'interface/common'
+import { Screen } from 'components/Screen'
+import { Cells } from 'duck/Tetris/types'
 
 const TetrisViewBox = styled.div`
   display: flex;

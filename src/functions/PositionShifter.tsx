@@ -1,4 +1,4 @@
-import { Cells, Cell, Block } from 'interface/common'
+import { Cells, Cell, Block } from 'duck/Tetris/types'
 
 export const getAddedPos = (XY: string, addX: number, addY: number): string => {
   let splitPos = XY.split(',')

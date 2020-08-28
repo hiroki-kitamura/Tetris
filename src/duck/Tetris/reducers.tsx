@@ -1,13 +1,9 @@
-import * as React from 'react';
-import { useEffect, useReducer } from 'react';
-import { TetrisView } from 'views/TetrisView';
-import { Cells, Cell, Block } from 'interface/common'
+import { Cells, Cell, Block } from 'duck/Tetris/types'
 import { BlockCreator } from 'functions/BlockCreator'
 import { getAddedPos, getPosNumber, shiftBlockPos } from 'functions/PositionShifter'
 const path = require('path');
 const src = path.resolve(__dirname, 'src');
 const deepMerge = require('deepmerge')
-
 
 const colNumber: number = 10;
 const rowNumber: number = 20;
@@ -131,19 +127,7 @@ const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
   return spinedBlock
 }
 
-const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
-  for (let XY in activeBlock.cells) {
 
-    let [X, Y] = getPosNumber(XY)
-
-    // 一番下に落ちた時
-    if (Y === rowNumber - 1) return true
-    // 下にブロックがある時
-    if (!activeBlock.cells.hasOwnProperty(`${X},${Y + 1}`) && fixedCells[`${X},${Y + 1}`].exist === true)
-      return true;
-  }
-  return false
-}
 
 const removeColIfFulledCol = (fixedCells: Cells): Cells => {
   const removeColList = extractColShouldRemove(fixedCells)
@@ -207,7 +191,6 @@ const scoreCalculater = (removeColNumber: number) => {
   }
 }
 
-const audio = new Audio(`${src}/assets/korobushka.wav`)
 
 const isGameOver = (fixedCells: Cells): boolean => {
   for (let XY in fixedCells) {
@@ -218,7 +201,19 @@ const isGameOver = (fixedCells: Cells): boolean => {
   return false
 }
 
-const reducer = (tetrisState, action) => {
+const initialTetrisState = {
+  viewCells: getBlankCells(),
+  fixedCells: getBlankCells(),
+  activeBlock: null,
+  nextBlock: BlockCreator(),
+  dropSpeed: 1000,
+  score: 0,
+  isMute: true,
+  isPlay: false,
+  isGameOver: false
+}
+
+export const tetris = (tetrisState = initialTetrisState, action) => {
   switch (action.type) {
     case 'putActiveBlock':
 
@@ -280,7 +275,6 @@ const reducer = (tetrisState, action) => {
         isGameOver: true,
         isPlay: false,
       }
-    case 'dropOrFixOrGameOver':
     case 'spinActiveBlock':
       const spinedBlock = spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
 
@@ -307,12 +301,13 @@ const reducer = (tetrisState, action) => {
         dropSpeed: tetrisState.dropSpeed * 0.95
       }
     case 'toggleAudioPlay':
+      console.log(action)
       if (tetrisState.isPlay === true) {
-        audio.play()
-        audio.loop = true;
+        action.audio.play()
+        action.audio.loop = true;
       } else {
-        audio.pause();
-        audio.currentTime = 0;
+        action.audio.pause();
+        action.audio.currentTime = 0;
       }
       return {
         ...tetrisState
@@ -324,92 +319,4 @@ const reducer = (tetrisState, action) => {
       }
     default: return tetrisState
   }
-}
-export const Tetris = () => {
-  const [tetrisState, dispatch] = useReducer(reducer, {
-    viewCells: getBlankCells(),
-    fixedCells: getBlankCells(),
-    activeBlock: null,
-    nextBlock: BlockCreator(),
-    dropSpeed: 1000,
-    score: 0,
-    isMute: true,
-    isPlay: false,
-    isGameOver: false
-  })
-
-  const dropActiveBlockIfCanDrop = () => {
-    console.log(tetrisState)
-    if (isGameOver(tetrisState.fixedCells)) {
-      dispatch({ type: 'gameOver' })
-    } else if (shouldFixActiveBlock(tetrisState.activeBlock, tetrisState.fixedCells)) {
-      dispatch({ type: 'fixActiveBlock' })
-    } else {
-      dispatch({ type: 'dropActiveBlock' })
-    }
-  }
-
-  const windowKeyDownEvent = (e) => {
-    switch (e.key) {
-      case 'ArrowLeft':
-      case 'h':
-        dispatch({ type: 'shiftActiveBlockLeft' })
-        break;
-      case 'ArrowRight':
-      case 'l':
-        dispatch({ type: 'shiftActiveBlockRight' })
-        break;
-      case 'ArrowDown':
-      case 'j':
-        dropActiveBlockIfCanDrop()
-        break;
-    }
-  }
-  useEffect(() => {
-    if (!tetrisState.activeBlock) return
-    var timeoutId = setTimeout(() => {
-      dropActiveBlockIfCanDrop()
-    }, tetrisState.dropSpeed)
-
-    window.addEventListener('keydown', windowKeyDownEvent)
-
-    return () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener('keydown', windowKeyDownEvent)
-    }
-  }, [tetrisState.activeBlock])
-
-  useEffect(() => {
-    dispatch({ type: 'toggleAudioPlay' })
-  }, [tetrisState.isPlay])
-
-  useEffect(() => {
-    setInterval(() => {
-      dispatch({ type: 'acceleDropSpeed' })
-    }, 3000);
-  }, [tetrisState.ActiveBlock])
-
-  audio.muted = tetrisState.isMute
-  return (
-    <TetrisView
-      viewCells={tetrisState.viewCells}
-      score={tetrisState.score}
-      nextBlock={{
-        name: tetrisState.nextBlock.name,
-        cells: tetrisState.nextBlock.cells
-      }}
-      isGameOver={tetrisState.isGameOver}
-      isPlay={tetrisState.isPlay}
-      isMute={tetrisState.isMute}
-      clickEvent={{
-        moveLeft: () => { dispatch({ type: 'shiftActiveBlockLeft' }) },
-        moveRight: () => { dispatch({ type: 'shiftActiveBlockRight' }) },
-        moveBottom: () => dropActiveBlockIfCanDrop(),
-        startGame: () => { dispatch({ type: 'putActiveBlock' }) },
-        resetGame: () => { dispatch({ type: 'resetGame' }) },
-        toggleAudioMute: () => { dispatch({ type: 'toggleAudioMute' }) },
-        spin: () => { dispatch({ type: 'spinActiveBlock' }) },
-      }}
-    />
-  )
 }

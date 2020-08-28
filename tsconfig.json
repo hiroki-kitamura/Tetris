@@ -5,10 +5,20 @@
     "module": "es2015",
     "jsx": "react", // JSXを有効化
     "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "rootDirs": [
+      "src/"
+    ],
+    "baseUrl": "src",
     "types": [
       "react",
       "node",
-      "styled-components"
+      "styled-components",
+      "react-redux"
     ]
-  }
+  },
+  "includes": "src/**/*",
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styled, { css } from 'styled-components';
-import { Cell, NextCell } from 'views/Cell';
-import { Cells } from 'interface/common'
+import { Cell, NextCell } from 'components/Cell';
+import { Cells } from 'duck/Tetris/types'
 import { getPosNumber } from 'functions/PositionShifter'
 const deepMerge = require('deepmerge')
 

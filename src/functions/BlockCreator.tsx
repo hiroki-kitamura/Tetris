@@ -1,4 +1,4 @@
-import { Cells, Cell, Block } from 'interface/common'
+import { Cells, Cell, Block } from 'duck/Tetris/types'
 import { getAddedPos, getPosNumber } from 'functions/PositionShifter'
 
 const squareBlock = {
