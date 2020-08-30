@@ -8,8 +8,8 @@ interface AudioProps {
 }
 
 let audio
+
 export const functionalAudio = (props: AudioProps) => {
-  console.log(props)
   useEffect(() => {
     audio = new Audio(props.src);
   }, [props.src])
@@ -27,5 +27,6 @@ export const functionalAudio = (props: AudioProps) => {
       audio.currentTime = 0;
     }
   }, [props.isPlay])
-  return (<></>)
+
+  return <></>
 }

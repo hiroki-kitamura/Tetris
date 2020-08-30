@@ -217,6 +217,10 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         activeBlock: tetrisState.nextBlock,
         nextBlock: BlockCreator(),
         isPlay: true,
+        audio: {
+          ...tetrisState.audio,
+          isPlay: true
+        }
       }
     case 'shiftActiveBlockLeft':
       let leftShiftedBlock = shiftBlockPos(tetrisState.activeBlock, -1, 0)
@@ -290,7 +294,11 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         score: 0,
         isPlay: false,
         isGameOver: false,
-        dropSpeed: 1000
+        dropSpeed: 1000,
+        audio: {
+          ...tetrisState.audio,
+          isPlay: false
+        }
       }
     case 'acceleDropSpeed':
       return {
@@ -301,24 +309,24 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
       return {
         ...tetrisState,
         audio: {
-          isPlay: true,
-          ...tetrisState.audio
+          ...tetrisState.audio,
+          isPlay: true
         }
       }
     case 'audioStop':
       return {
         ...tetrisState,
         audio: {
-          isPlay: false,
-          ...tetrisState.audio
+          ...tetrisState.audio,
+          isPlay: false
         }
       }
     case 'toggleAudioMute':
       return {
         ...tetrisState,
         audio: {
-          isMute: !tetrisState.audio.isMute,
-          ...tetrisState.audio
+          ...tetrisState.audio,
+          isMute: !tetrisState.audio.isMute
         }
       }
     default: return tetrisState

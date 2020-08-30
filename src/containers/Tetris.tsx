@@ -133,12 +133,11 @@ const mapStateToProps = (state): TetrisStateMap => {
   }
 }
 
-const mapDispatchToProps = (dispatch: Dispatch) => {
+const mapDispatchToProps = (dispatch) => {
   return bindActionCreators({
     ...tetrisActions
   }, dispatch)
 }
-
 export default connect(
   mapStateToProps,
   mapDispatchToProps
