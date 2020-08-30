@@ -1,4 +1,4 @@
-import { Cells, Cell, Block } from 'duck/Tetris/types'
+import { Cells, Cell, Block, TetrisState } from 'duck/Tetris/types'
 import { BlockCreator } from 'functions/BlockCreator'
 import { getAddedPos, getPosNumber, shiftBlockPos } from 'functions/PositionShifter'
 const path = require('path');
@@ -191,26 +191,20 @@ const scoreCalculater = (removeColNumber: number) => {
   }
 }
 
-
-const isGameOver = (fixedCells: Cells): boolean => {
-  for (let XY in fixedCells) {
-    let [X, Y] = getPosNumber(XY)
-
-    if (fixedCells[`${X},1`].exist === true) return true
-  }
-  return false
-}
-
-const initialTetrisState = {
+const initialTetrisState: TetrisState = {
   viewCells: getBlankCells(),
   fixedCells: getBlankCells(),
   activeBlock: null,
   nextBlock: BlockCreator(),
   dropSpeed: 1000,
   score: 0,
-  isMute: true,
   isPlay: false,
-  isGameOver: false
+  isGameOver: false,
+  audio: {
+    src: `${src}/assets/korobushka.wav`,
+    isMute: true,
+    isPlay: false,
+  }
 }
 
 export const tetris = (tetrisState = initialTetrisState, action) => {
@@ -222,7 +216,7 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         viewCells: mergeCells(tetrisState.fixedCells, tetrisState.nextBlock.cells),
         activeBlock: tetrisState.nextBlock,
         nextBlock: BlockCreator(),
-        isPlay: true
+        isPlay: true,
       }
     case 'shiftActiveBlockLeft':
       let leftShiftedBlock = shiftBlockPos(tetrisState.activeBlock, -1, 0)
@@ -274,6 +268,9 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         activeBlock: null,
         isGameOver: true,
         isPlay: false,
+        audio: {
+          isPlay: false
+        }
       }
     case 'spinActiveBlock':
       const spinedBlock = spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
@@ -300,22 +297,29 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         ...tetrisState,
         dropSpeed: tetrisState.dropSpeed * 0.95
       }
-    case 'toggleAudioPlay':
-      console.log(action)
-      if (tetrisState.isPlay === true) {
-        action.audio.play()
-        action.audio.loop = true;
-      } else {
-        action.audio.pause();
-        action.audio.currentTime = 0;
-      }
+    case 'audioPlay':
       return {
-        ...tetrisState
+        ...tetrisState,
+        audio: {
+          isPlay: true,
+          ...tetrisState.audio
+        }
+      }
+    case 'audioStop':
+      return {
+        ...tetrisState,
+        audio: {
+          isPlay: false,
+          ...tetrisState.audio
+        }
       }
     case 'toggleAudioMute':
       return {
         ...tetrisState,
-        isMute: !tetrisState.isMute
+        audio: {
+          isMute: !tetrisState.audio.isMute,
+          ...tetrisState.audio
+        }
       }
     default: return tetrisState
   }

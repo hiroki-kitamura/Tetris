@@ -1,15 +1,19 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, Store, Action } from 'redux';
 import { Provider, connect } from 'react-redux'
 import Tetris from 'containers/Tetris';
 import { tetris } from 'duck/Tetris/reducers'
-interface Store {
-  tetris: any
+import { TetrisState } from 'duck/Tetris/types'
+
+interface StoreState {
+  tetris: TetrisState
 }
+
 const rootReducer = combineReducers({ tetris })
 
-const store = createStore(rootReducer)
+const store: Store<StoreState, Action> = createStore(rootReducer)
+
 
 const App = () => {
   return (

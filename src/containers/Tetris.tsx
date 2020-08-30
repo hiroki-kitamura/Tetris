@@ -1,21 +1,25 @@
 import * as React from 'react';
-import { useEffect, useReducer } from 'react';
-import { TetrisView } from '../components/TetrisView';
-import { getAddedPos, getPosNumber, shiftBlockPos } from 'functions/PositionShifter'
-import { Provider, connect } from 'react-redux'
-import { Cells, Cell, Block } from 'duck/Tetris/types'
+import { useEffect } from 'react';
+import { connect } from 'react-redux'
+import { bindActionCreators, Dispatch } from 'redux';
+import styled from 'styled-components';
+
+import { Screen } from 'components/Screen'
+import { Controller } from 'components/Controller'
+import { functionalAudio as Audio } from 'components/Audio'
+
 import { tetrisActions } from 'duck/Tetris/actions'
-import { bindActionCreators } from 'redux';
-const path = require('path');
-const src = path.resolve(__dirname, 'src');
 
+import { Cells, Cell, Block, TetrisState, TetrisProps } from 'duck/Tetris/types'
 
-
-const colNumber: number = 10;
+import { getAddedPos, getPosNumber, shiftBlockPos } from 'functions/PositionShifter'
 const rowNumber: number = 20;
-const audio = new Audio(`${src}/assets/korobushka.wav`)
 
-const Tetris = (props) => {
+const TetrisView = styled.div`
+  display: flex;
+`
+
+const Tetris = (props: TetrisProps) => {
   const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
     for (let XY in activeBlock.cells) {
 
@@ -49,8 +53,6 @@ const Tetris = (props) => {
     }
   }
 
-
-
   const windowKeyDownEvent = (e) => {
     switch (e.key) {
       case 'ArrowLeft':
@@ -77,56 +79,66 @@ const Tetris = (props) => {
 
     window.addEventListener('keydown', windowKeyDownEvent)
 
+    var intervalId = setInterval(() => {
+      props.acceleDropSpeed()
+    }, 3000);
+
     return () => {
       clearTimeout(timeoutId)
+      clearInterval(intervalId)
       window.removeEventListener('keydown', windowKeyDownEvent)
     }
   }, [props.state.activeBlock])
 
   useEffect(() => {
-    props.toggleAudioPlay(audio)
+    if (props.state.audio.isPlay) props.audioPlay()
+    else props.audioStop()
   }, [props.state.isPlay])
 
-  useEffect(() => {
-    setInterval(() => {
-      props.acceleDropSpeed()
-    }, 3000);
-  }, [props.state.ActiveBlock])
-
-  audio.muted = props.state.isMute
   return (
-    <TetrisView
-      viewCells={props.state.viewCells}
-      score={props.score}
-      nextBlock={{
-        name: props.state.nextBlock.name,
-        cells: props.state.nextBlock.cells
-      }}
-      isGameOver={props.state.isGameOver}
-      isPlay={props.state.isPlay}
-      isMute={props.state.isMute}
-      clickEvent={{
-        moveLeft: () => props.shiftActiveBlockLeft(),
-        moveRight: () => props.shiftActiveBlockRight(),
-        moveBottom: () => dropActiveBlockIfCanDrop(),
-        startGame: () => props.putActiveBlock(),
-        resetGame: () => props.resetGame(),
-        toggleAudioMute: () => props.toggleAudioMute(audio),
-        spin: () => props.spinActiveBlock(),
-      }}
-    />
+    <TetrisView>
+      <Screen
+        viewCells={props.state.viewCells}
+        nextBlock={props.state.nextBlock}
+        isGameOver={props.state.isGameOver}
+        score={props.state.score} />
+      <Controller
+        clickEvent={{
+          moveLeft: props.putActiveBlock,
+          moveRight: props.shiftActiveBlockRight,
+          moveBottom: props.dropActiveBlock,
+          startGame: props.putActiveBlock,
+          resetGame: props.resetGame,
+          toggleAudioMute: props.toggleAudioMute,
+          spin: props.spinActiveBlock
+        }}
+        isPlay={props.state.isPlay}
+        isGameOver={props.state.isGameOver}
+        isMute={props.state.audio.isMute} />
+      <Audio
+        src={props.state.audio.src}
+        isMute={props.state.audio.isMute}
+        isPlay={props.state.audio.isPlay} />
+    </TetrisView>
   )
 }
-const mapStateToProps = (state) => {
+
+interface TetrisStateMap {
+  state: TetrisState
+}
+
+const mapStateToProps = (state): TetrisStateMap => {
   return {
     state: state.tetris
   }
 }
-const mapDispatchToProps = (dispatch) => {
+
+const mapDispatchToProps = (dispatch: Dispatch) => {
   return bindActionCreators({
     ...tetrisActions
   }, dispatch)
 }
+
 export default connect(
   mapStateToProps,
   mapDispatchToProps

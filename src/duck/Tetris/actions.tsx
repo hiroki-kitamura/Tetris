@@ -43,10 +43,14 @@ export const acceleDropSpeed = () => {
     type: "acceleDropSpeed"
   }
 }
-export const toggleAudioPlay = (audio: HTMLAudioElement) => {
+export const audioPlay = () => {
   return {
-    type: "toggleAudioPlay",
-    audio
+    type: "audioPlay",
+  }
+}
+export const audioStop = () => {
+  return {
+    type: "audioStop",
   }
 }
 export const toggleAudioMute = () => {
@@ -65,6 +69,7 @@ export const tetrisActions = {
   spinActiveBlock,
   resetGame,
   acceleDropSpeed,
-  toggleAudioPlay,
+  audioPlay,
+  audioStop,
   toggleAudioMute
 }
