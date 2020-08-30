@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 const src = path.resolve(__dirname, 'src');
 const dist = path.resolve(__dirname, 'dist');
 
@@ -32,7 +33,7 @@ module.exports = {
         use: "ts-loader",
       },
       {
-        test: /\.wav/,
+        test: /(\.wav|\.ico)/,
         use: "file-loader"
       }
 
@@ -51,6 +52,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: src + '/index.html',
       filename: 'index.html'
-    })
+    }),
+    new FaviconsWebpackPlugin(`${src}/favicon.ico`)
   ]
 };
