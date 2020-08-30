@@ -73,19 +73,19 @@ const Tetris = (props: TetrisProps) => {
   }
   useEffect(() => {
     if (!props.state.activeBlock) return
-    var timeoutId = setTimeout(() => {
+    const dropTimeoutId = setTimeout(() => {
       dropActiveBlockIfCanDrop()
     }, props.state.dropSpeed)
 
     window.addEventListener('keydown', windowKeyDownEvent)
 
-    var intervalId = setInterval(() => {
+    const acceleTimeoutId = setTimeout(() => {
       props.acceleDropSpeed()
     }, 3000);
 
     return () => {
-      clearTimeout(timeoutId)
-      clearInterval(intervalId)
+      clearTimeout(dropTimeoutId)
+      clearInterval(acceleTimeoutId)
       window.removeEventListener('keydown', windowKeyDownEvent)
     }
   }, [props.state.activeBlock])
