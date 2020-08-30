@@ -1,5 +1,7 @@
-import { Cells, Cell, Block } from 'duck/Tetris/types'
-import { getAddedPos, getPosNumber } from 'functions/PositionShifter'
+// types
+import { Cell, Block } from 'duck/Tetris/types'
+// functions 
+import { getAddedPos } from 'duck/Tetris/common/PositionShifter'
 
 const squareBlock = {
   name: 'square',

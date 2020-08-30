@@ -8,7 +8,6 @@ interface AudioProps {
 }
 
 let audio
-
 export const functionalAudio = (props: AudioProps) => {
   useEffect(() => {
     audio = new Audio(props.src);

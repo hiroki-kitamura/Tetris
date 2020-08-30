@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { Cell as CellInterface } from 'duck/Tetris/types'
 
 interface CellProps {
   name?: string,

@@ -1,9 +1,9 @@
+// node_modules
 import * as React from 'react';
 import styled, { css } from 'styled-components';
-import { Cell, NextCell } from 'components/Cell';
-import { Cells } from 'duck/Tetris/types'
-import { getPosNumber } from 'functions/PositionShifter'
 const deepMerge = require('deepmerge')
+// components
+import { Cell, NextCell } from 'components/Cell';
 
 const CellsView = styled.div`
   display: flex;
@@ -12,9 +12,11 @@ const CellsView = styled.div`
   width: 400px;
   border: 1px solid black;
 `;
+
 interface GameOverProps {
   isGameOver: boolean
 }
+
 const GameOver = styled.div<GameOverProps>`
   position: absolute;
   top: 100px;
@@ -38,22 +40,27 @@ const StatusView = styled.div`
 const ScreenBox = styled.div`
   display:flex;
 `
+
 const ScoreView = styled.div`
   text-align: center;
   font-size:20px;
   color:white;
 `
+
 const TitleStyle = css`
   margin:0 auto 20px;
   text-align:center;
   color:white;
 `
+
 const NextBlockTitle = styled.h3`
   ${TitleStyle}
 `
+
 const ScoreTitle = styled.h3`
   ${TitleStyle}
 `
+
 const NextBlockView = styled.div`
   display:flex;
   flex-wrap:wrap;
@@ -61,9 +68,27 @@ const NextBlockView = styled.div`
   margin:0 auto;
 `
 
+
+interface Cell {
+  exist: boolean,
+  backgroundColor: string
+}
+
+interface Cells {
+  [index: string]: Cell
+}
+
 interface NextBlock {
   name: string,
   cells: Cells
+}
+
+const getPosNumber = (XY: string): Array<number> => {
+  let splitPosList = XY.split(',')
+  let X = Number(splitPosList[0])
+  let Y = Number(splitPosList[1])
+
+  return [X, Y]
 }
 
 const makeBlankSquareCells = (colNumber: number) => {
@@ -79,6 +104,7 @@ const makeBlankSquareCells = (colNumber: number) => {
   }
   return cells
 }
+
 const viewCellsCreator = (cells): Array<JSX.Element> => {
   const cellList = []
   let i = 0

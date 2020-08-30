@@ -1,19 +1,20 @@
+// node_modules
 import * as React from 'react';
 import { useEffect } from 'react';
 import { connect } from 'react-redux'
-import { bindActionCreators, Dispatch } from 'redux';
+import { bindActionCreators } from 'redux';
 import styled from 'styled-components';
-
+// componets
 import { Screen } from 'components/Screen'
 import { Controller } from 'components/Controller'
 import { functionalAudio as Audio } from 'components/Audio'
-
+// actions 
 import { tetrisActions } from 'duck/Tetris/actions'
-
-import { Cells, Cell, Block, TetrisState, TetrisProps } from 'duck/Tetris/types'
-
-import { getAddedPos, getPosNumber, shiftBlockPos } from 'functions/PositionShifter'
-const rowNumber: number = 20;
+// types 
+import { Cells, Block, TetrisState, TetrisProps } from 'duck/Tetris/types'
+// functions
+import { getPosNumber } from 'duck/Tetris/common/PositionShifter'
+import { rowNumber } from 'duck/Tetris/common/common'
 
 const TetrisView = styled.div`
   display: flex;
