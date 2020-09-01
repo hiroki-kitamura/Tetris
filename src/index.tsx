@@ -7,14 +7,16 @@ import { Provider } from 'react-redux'
 import Tetris from 'containers/Tetris';
 // reducer
 import { tetris } from 'duck/Tetris/reducers'
+import { audio } from 'duck/Audio/reducers'
 // types
 import { TetrisState } from 'duck/Tetris/types'
+import { AudioState } from 'duck/Audio/types'
 
 interface StoreState {
   tetris: TetrisState
+  audio: AudioState
 }
-
-const rootReducer = combineReducers({ tetris })
+const rootReducer = combineReducers({ tetris, audio })
 
 const store: Store<StoreState, Action> = createStore(rootReducer)
 

@@ -22,14 +22,9 @@ export interface TetrisState {
   score: number,
   isPlay: boolean,
   isGameOver: boolean,
-  audio: {
-    src: string,
-    isMute: boolean,
-    isPlay: boolean
-  }
 }
 
-export interface TetrisProps {
+export interface TetrisActions {
   putActiveBlock,
   shiftActiveBlockLeft,
   shiftActiveBlockRight,
@@ -39,8 +34,8 @@ export interface TetrisProps {
   spinActiveBlock,
   resetGame,
   acceleDropSpeed,
-  audioPlay,
-  audioStop,
-  toggleAudioMute,
+}
+
+export interface TetrisProps extends TetrisActions {
   state: TetrisState
 }

@@ -18,11 +18,6 @@ const initialTetrisState: TetrisState = {
   score: 0,
   isPlay: false,
   isGameOver: false,
-  audio: {
-    src: `${src}/assets/korobushka.wav`,
-    isMute: true,
-    isPlay: false,
-  }
 }
 
 export const tetris = (tetrisState = initialTetrisState, action) => {
@@ -34,10 +29,6 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         activeBlock: tetrisState.nextBlock,
         nextBlock: BlockCreator(),
         isPlay: true,
-        audio: {
-          ...tetrisState.audio,
-          isPlay: true
-        }
       }
     case 'shiftActiveBlockLeft':
       let leftShiftedBlock = shiftBlockPos(tetrisState.activeBlock, -1, 0)
@@ -114,39 +105,11 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         isPlay: false,
         isGameOver: false,
         dropSpeed: 1000,
-        audio: {
-          ...tetrisState.audio,
-          isPlay: false
-        }
       }
     case 'acceleDropSpeed':
       return {
         ...tetrisState,
         dropSpeed: tetrisState.dropSpeed * 0.95
-      }
-    case 'audioPlay':
-      return {
-        ...tetrisState,
-        audio: {
-          ...tetrisState.audio,
-          isPlay: true
-        }
-      }
-    case 'audioStop':
-      return {
-        ...tetrisState,
-        audio: {
-          ...tetrisState.audio,
-          isPlay: false
-        }
-      }
-    case 'toggleAudioMute':
-      return {
-        ...tetrisState,
-        audio: {
-          ...tetrisState.audio,
-          isMute: !tetrisState.audio.isMute
-        }
       }
     default: return tetrisState
   }

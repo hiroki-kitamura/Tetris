@@ -10,8 +10,10 @@ import { Controller } from 'components/Controller'
 import { functionalAudio as Audio } from 'components/Audio'
 // actions 
 import { tetrisActions } from 'duck/Tetris/actions'
+import { audioActions } from 'duck/Audio/actions'
 // types 
-import { Cells, Block, TetrisState, TetrisProps } from 'duck/Tetris/types'
+import { TetrisState, TetrisActions } from 'duck/Tetris/types'
+import { AudioState, AudioActions } from 'duck/Audio/types'
 // functions
 import { isGameOver, shouldFixActiveBlock } from 'duck/Tetris/common/common'
 
@@ -19,15 +21,34 @@ const TetrisView = styled.div`
   display: flex;
 `
 
+interface MapTetrisState {
+  tetris: TetrisState
+  audio: AudioState
+}
+
+interface MapTetrisActions {
+  tetris: TetrisActions,
+  audio: AudioActions
+}
+
+interface TetrisProps {
+  tetris: TetrisActions & {
+    state: TetrisState
+  }
+  audio: AudioActions & {
+    state: AudioState
+  }
+}
+
 const Tetris = (props: TetrisProps) => {
 
   const dropActiveBlockIfCanDrop = () => {
-    if (isGameOver(props.state.fixedCells)) {
-      props.gameOver()
-    } else if (shouldFixActiveBlock(props.state.activeBlock, props.state.fixedCells)) {
-      props.fixActiveBlock()
+    if (isGameOver(props.tetris.state.fixedCells)) {
+      props.tetris.gameOver()
+    } else if (shouldFixActiveBlock(props.tetris.state.activeBlock, props.tetris.state.fixedCells)) {
+      props.tetris.fixActiveBlock()
     } else {
-      props.dropActiveBlock()
+      props.tetris.dropActiveBlock()
     }
   }
 
@@ -35,30 +56,30 @@ const Tetris = (props: TetrisProps) => {
     switch (e.key) {
       case 'ArrowLeft':
       case 'h':
-        props.shiftActiveBlockLeft()
+        props.tetris.shiftActiveBlockLeft()
         break;
       case 'ArrowRight':
       case 'l':
-        props.shiftActiveBlockRight()
+        props.tetris.shiftActiveBlockRight()
         break;
       case 'ArrowDown':
       case 'j':
         dropActiveBlockIfCanDrop()
         break;
       case ' ':
-        props.spinActiveBlock()
+        props.tetris.spinActiveBlock()
     }
   }
   useEffect(() => {
-    if (!props.state.activeBlock) return
+    if (!props.tetris.state.activeBlock) return
     const dropTimeoutId = setTimeout(() => {
       dropActiveBlockIfCanDrop()
-    }, props.state.dropSpeed)
+    }, props.tetris.state.dropSpeed)
 
     window.addEventListener('keydown', windowKeyDownEvent)
 
     const acceleTimeoutId = setTimeout(() => {
-      props.acceleDropSpeed()
+      props.tetris.acceleDropSpeed()
     }, 3000);
 
     return () => {
@@ -66,54 +87,71 @@ const Tetris = (props: TetrisProps) => {
       clearInterval(acceleTimeoutId)
       window.removeEventListener('keydown', windowKeyDownEvent)
     }
-  }, [props.state.activeBlock])
+  }, [props.tetris.state.activeBlock])
 
   useEffect(() => {
-    if (props.state.audio.isPlay) props.audioPlay()
-    else props.audioStop()
-  }, [props.state.isPlay])
+    if (props.tetris.state.isPlay) props.audio.audioPlay()
+    else props.audio.audioStop()
+  }, [props.tetris.state.isPlay])
 
   return (
     <TetrisView>
       <Screen
-        viewCells={props.state.viewCells}
-        nextBlock={props.state.nextBlock}
-        isGameOver={props.state.isGameOver}
-        score={props.state.score} />
+        viewCells={props.tetris.state.viewCells}
+        nextBlock={props.tetris.state.nextBlock}
+        isGameOver={props.tetris.state.isGameOver}
+        score={props.tetris.state.score} />
       <Controller
         clickEvent={{
-          moveLeft: props.putActiveBlock,
-          moveRight: props.shiftActiveBlockRight,
-          moveBottom: props.dropActiveBlock,
-          startGame: props.putActiveBlock,
-          resetGame: props.resetGame,
-          toggleAudioMute: props.toggleAudioMute,
-          spin: props.spinActiveBlock
+          moveLeft: props.tetris.putActiveBlock,
+          moveRight: props.tetris.shiftActiveBlockRight,
+          moveBottom: props.tetris.dropActiveBlock,
+          startGame: props.tetris.putActiveBlock,
+          resetGame: props.tetris.resetGame,
+          toggleAudioMute: props.audio.toggleAudioMute,
+          spin: props.tetris.spinActiveBlock
         }}
-        isPlay={props.state.isPlay}
-        isGameOver={props.state.isGameOver}
-        isMute={props.state.audio.isMute} />
+        isPlay={props.tetris.state.isPlay}
+        isGameOver={props.tetris.state.isGameOver}
+        isMute={props.audio.state.isMute} />
       <Audio
-        src={props.state.audio.src}
-        isMute={props.state.audio.isMute}
-        isPlay={props.state.audio.isPlay} />
+        src={props.audio.state.src}
+        isMute={props.audio.state.isMute}
+        isPlay={props.audio.state.isPlay} />
     </TetrisView>
   )
 }
 
-interface TetrisStateMap {
-  state: TetrisState
-}
 
-const mapStateToProps = (state): TetrisStateMap => ({
-  state: state.tetris
+
+const mapStateToProps = (state): MapTetrisState => ({
+  tetris: state.tetris,
+  audio: state.audio
 })
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({
-  ...tetrisActions
-}, dispatch)
+
+const mapDispatchToProps = (dispatch): MapTetrisActions => ({
+  tetris: bindActionCreators({
+    ...tetrisActions
+  }, dispatch),
+  audio: bindActionCreators({
+    ...audioActions
+  }, dispatch)
+})
+
+const mergeProps = (stateProps: MapTetrisState, dispatchProps: MapTetrisActions): TetrisProps => ({
+  tetris: {
+    ...dispatchProps.tetris,
+    state: stateProps.tetris
+  },
+  audio: {
+    ...dispatchProps.audio,
+    state: stateProps.audio
+  }
+})
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps
 )(Tetris)
