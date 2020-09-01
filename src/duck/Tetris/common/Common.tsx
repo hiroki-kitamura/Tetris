@@ -14,7 +14,7 @@ export const blankCell: Cell = {
 }
 
 export const getBlankCells = (): Cells => {
-  let cells = {}
+  const cells = {}
 
   for (let x = 0; x < colNumber; x++) {
     for (let y = 0; y < rowNumber; y++) {
@@ -30,8 +30,8 @@ export const mergeCells = (baseCells: Cells, overwriteCells): Cells => {
 }
 
 export const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
-  for (let XY in block.cells) {
-    let [X, Y] = getPosNumber(XY)
+  for (const XY in block.cells) {
+    const [X, Y] = getPosNumber(XY)
 
     if (X < 0 || X >= colNumber || Y < 0 || Y >= rowNumber) return false
 
@@ -41,9 +41,9 @@ export const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
 }
 
 export const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
-  for (let XY in activeBlock.cells) {
+  for (const XY in activeBlock.cells) {
 
-    let [X, Y] = getPosNumber(XY)
+    const [X, Y] = getPosNumber(XY)
 
     // 一番下に落ちた時
     if (Y === rowNumber - 1) return true
@@ -55,8 +55,8 @@ export const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boo
 }
 
 export const isGameOver = (fixedCells: Cells): boolean => {
-  for (let XY in fixedCells) {
-    let [X, Y] = getPosNumber(XY)
+  for (const XY in fixedCells) {
+    const [X, Y] = getPosNumber(XY)
 
     if (fixedCells[`${X},1`].exist === true) return true
   }

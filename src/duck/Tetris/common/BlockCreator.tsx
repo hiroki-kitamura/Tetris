@@ -88,7 +88,7 @@ export const BlockCreator = (): Block => {
 
   block.name = selectedBlock.name
 
-  let axisOfRotation = getAddedPos(selectedBlock.axisOfRotation, centerCol, 0)
+  const axisOfRotation = getAddedPos(selectedBlock.axisOfRotation, centerCol, 0)
 
   block.axisOfRotation = axisOfRotation
 

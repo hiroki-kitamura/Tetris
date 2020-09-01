@@ -105,17 +105,14 @@ interface TetrisStateMap {
   state: TetrisState
 }
 
-const mapStateToProps = (state): TetrisStateMap => {
-  return {
-    state: state.tetris
-  }
-}
+const mapStateToProps = (state): TetrisStateMap => ({
+  state: state.tetris
+})
 
-const mapDispatchToProps = (dispatch) => {
-  return bindActionCreators({
-    ...tetrisActions
-  }, dispatch)
-}
+const mapDispatchToProps = (dispatch) => bindActionCreators({
+  ...tetrisActions
+}, dispatch)
+
 export default connect(
   mapStateToProps,
   mapDispatchToProps

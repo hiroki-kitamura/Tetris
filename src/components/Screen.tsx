@@ -68,7 +68,6 @@ const NextBlockView = styled.div`
   margin:0 auto;
 `
 
-
 interface Cell {
   exist: boolean,
   backgroundColor: string
@@ -84,16 +83,17 @@ interface NextBlock {
 }
 
 const getPosNumber = (XY: string): Array<number> => {
-  let splitPosList = XY.split(',')
-  let X = Number(splitPosList[0])
-  let Y = Number(splitPosList[1])
+  const splitPosList = XY.split(',')
+  const X = Number(splitPosList[0])
+  const Y = Number(splitPosList[1])
 
   return [X, Y]
 }
 
 const makeBlankSquareCells = (colNumber: number) => {
-  let cells = {}
-  let startCol = 4
+  const cells = {}
+  const startCol = 4
+
   for (let x = startCol; x < startCol + colNumber; x++) {
     for (let y = 0; y < colNumber; y++) {
       cells[`${x},${y}`] = {
@@ -108,6 +108,7 @@ const makeBlankSquareCells = (colNumber: number) => {
 const viewCellsCreator = (cells): Array<JSX.Element> => {
   const cellList = []
   let i = 0
+
   for (let y = 0; y < 20; y++) {
     for (let x = 0; x < 10; x++) {
       cellList.push(
@@ -121,6 +122,7 @@ const viewCellsCreator = (cells): Array<JSX.Element> => {
 
 const NextBlockCellsCreator = (nextBlock: NextBlock): Array<JSX.Element> => {
   let blankCells
+
   switch (nextBlock.name) {
     case 'square':
     case 'l':
@@ -135,17 +137,18 @@ const NextBlockCellsCreator = (nextBlock: NextBlock): Array<JSX.Element> => {
       break;
   }
 
-  let nextBlockCells = deepMerge(blankCells, nextBlock.cells)
-  let cellList = []
+  const nextBlockCells = deepMerge(blankCells, nextBlock.cells)
+  const cellList = []
   let i = 0
 
-  for (let XY in nextBlockCells) {
+  for (const XY in nextBlockCells) {
     const [X, Y] = getPosNumber(XY)
     cellList.push(
       <NextCell name={nextBlock.name} backgroundColor={nextBlockCells[`${X},${Y}`]['backgroundColor']} key={i} />
     )
     i++
   }
+
   return cellList
 }
 

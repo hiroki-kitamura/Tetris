@@ -10,7 +10,7 @@ export const shiftBlockPos = (targetBlock: Block, addX: number, addY: number): B
     cells: {}
   }
 
-  for (let XY in targetBlock.cells) {
+  for (const XY in targetBlock.cells) {
     const addedXY = getAddedPos(XY, addX, addY)
     shiftedBlock.cells[addedXY] = targetBlock.cells[XY]
   }
@@ -24,10 +24,10 @@ export const shiftBlockIfStickout = (targetBlock: Block): Block => {
     ...targetBlock,
     cells: {},
   }
-
   let overlapX = 0;
   let overlapY = 0;
-  for (let XY in targetBlock.cells) {
+
+  for (const XY in targetBlock.cells) {
     let [X, Y] = getPosNumber(XY)
     if (X >= colNumber) {
       if (Math.abs(overlapX) < Math.abs(colNumber - X - 1)) overlapX = colNumber - X - 1
@@ -56,11 +56,10 @@ export const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, pr
   let shiftY = 0;
   let i = 0;
 
-  for (let XY in targetBlock.cells) {
-
-    let [X, Y] = getPosNumber(XY)
-    let [axisOfRotationX, axisOfRotationY] = getPosNumber(targetBlock.axisOfRotation)
-    let [preAxisOfRotationX, preAxisOfRotationY] = getPosNumber(preTargetBlock.axisOfRotation)
+  for (const XY in targetBlock.cells) {
+    const [X, Y] = getPosNumber(XY)
+    const [axisOfRotationX, axisOfRotationY] = getPosNumber(targetBlock.axisOfRotation)
+    const [preAxisOfRotationX, preAxisOfRotationY] = getPosNumber(preTargetBlock.axisOfRotation)
 
     if (fixedCells[XY].exist) {
       if (preAxisOfRotationX > X) {
@@ -91,19 +90,19 @@ export const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
   if (spinBlock.name === 'square') return spinBlock;
 
 
-  let spinedBlockOrigin: Block = {
+  const spinedBlockOrigin: Block = {
     ...spinBlock,
     axisOfRotation: '0,0',
     cells: {}
   }
 
-  let [axisOfRotationX, axisOfRotationY] = getPosNumber(spinBlock.axisOfRotation)
-  let spinBlockOrigin = shiftBlockPos(spinBlock, -axisOfRotationX, -axisOfRotationY);
+  const [axisOfRotationX, axisOfRotationY] = getPosNumber(spinBlock.axisOfRotation)
+  const spinBlockOrigin = shiftBlockPos(spinBlock, -axisOfRotationX, -axisOfRotationY);
 
-  for (let XY in spinBlockOrigin.cells) {
-    let [X, Y] = getPosNumber(XY)
-    let spinedX = -Y
-    let spinedY = X
+  for (const XY in spinBlockOrigin.cells) {
+    const [X, Y] = getPosNumber(XY)
+    const spinedX = -Y
+    const spinedY = X
 
     if (!spinedBlockOrigin.cells.hasOwnProperty(`${spinedX},${spinedY}`)) {
       spinedBlockOrigin.cells[`${spinedX},${spinedY}`] = spinBlockOrigin.cells[XY]

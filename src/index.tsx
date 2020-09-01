@@ -18,7 +18,6 @@ const rootReducer = combineReducers({ tetris })
 
 const store: Store<StoreState, Action> = createStore(rootReducer)
 
-
 const App = () => {
   return (
     <Provider store={store}>

@@ -28,7 +28,6 @@ const initialTetrisState: TetrisState = {
 export const tetris = (tetrisState = initialTetrisState, action) => {
   switch (action.type) {
     case 'putActiveBlock':
-
       return {
         ...tetrisState,
         viewCells: mergeCells(tetrisState.fixedCells, tetrisState.nextBlock.cells),
@@ -42,6 +41,7 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
       }
     case 'shiftActiveBlockLeft':
       let leftShiftedBlock = shiftBlockPos(tetrisState.activeBlock, -1, 0)
+
       leftShiftedBlock = shiftBlockIfStickout(leftShiftedBlock)
       leftShiftedBlock = shiftBlockIfOverlaping(tetrisState.fixedCells, leftShiftedBlock, tetrisState.activeBlock)
 
@@ -52,6 +52,7 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
       }
     case 'shiftActiveBlockRight':
       let rightShiftedBlock = shiftBlockPos(tetrisState.activeBlock, 1, 0)
+
       rightShiftedBlock = shiftBlockIfStickout(rightShiftedBlock)
       rightShiftedBlock = shiftBlockIfOverlaping(tetrisState.fixedCells, rightShiftedBlock, tetrisState.activeBlock)
 
@@ -61,7 +62,8 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         activeBlock: rightShiftedBlock
       }
     case 'dropActiveBlock':
-      let dropedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
+      const dropedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
+
       return {
         ...tetrisState,
         viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
@@ -69,13 +71,12 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         activeBlock: dropedActiveBlock,
       }
     case 'fixActiveBlock':
-      let mergedCells = mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells)
-      let newFixedCells = removeColIfFulledCol(mergedCells)
+      const mergedCells = mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells)
+      const newFixedCells = removeColIfFulledCol(mergedCells)
+      const removeColList = extractColShouldRemove(mergedCells)
+      const newScore = scoreCalculater(removeColList.length) + tetrisState.score
+      const newActiveBlock = tetrisState.nextBlock;
 
-      let removeColList = extractColShouldRemove(mergedCells)
-      let newScore = scoreCalculater(removeColList.length) + tetrisState.score
-
-      let newActiveBlock = tetrisState.nextBlock;
       return {
         ...tetrisState,
         viewCells: mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells),

@@ -5,6 +5,7 @@ const Controler = styled.div`
   display:flex;
   flex-wrap:wrap;
 `
+
 const ArrowBox = styled.div`
   display:flex;
   flex-wrap: wrap;
@@ -28,6 +29,7 @@ const UnderArrowBox = styled.div`
   width:100%;
   text-align:center;
 `
+
 const Arrow = css`
   display:inline-block;
   width:50px;
@@ -39,6 +41,7 @@ const Arrow = css`
   box-sizing: border-box;
   cursor: pointer;
 `
+
 const UpperArrow = styled.button`
   ${Arrow}
 `
@@ -51,8 +54,8 @@ const RightArrow = styled.button`
 const UnderArrow = styled.button`
   ${Arrow}
 `
-const ButtonBox = styled.div`
 
+const ButtonBox = styled.div`
 `
 const Button = css`
   width:100px;
@@ -74,6 +77,7 @@ const MuteButton = styled.button`
   ${Button}
   margin-left: 10px;
 `
+
 interface ControllerProps {
   isPlay: boolean,
   isGameOver: boolean,
@@ -88,9 +92,11 @@ interface ControllerProps {
     spin: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void,
   }
 }
+
 export const Controller = (props: ControllerProps) => {
   let isResetDisabled
   let isStartDisabled
+
   if (props.isGameOver) {
     isStartDisabled = true;
     isResetDisabled = false;
