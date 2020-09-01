@@ -1,63 +1,39 @@
-export const putActiveBlock = () => {
-  return {
-    type: "putActiveBlock"
-  }
-}
-export const shiftActiveBlockLeft = () => {
-  return {
-    type: "shiftActiveBlockLeft"
-  }
-}
-export const shiftActiveBlockRight = () => {
-  return {
-    type: "shiftActiveBlockRight"
-  }
-}
-export const dropActiveBlock = () => {
-  return {
-    type: "dropActiveBlock"
-  }
-}
-export const fixActiveBlock = () => {
-  return {
-    type: "fixActiveBlock"
-  }
-}
-export const gameOver = () => {
-  return {
-    type: "gameOver"
-  }
-}
-export const spinActiveBlock = () => {
-  return {
-    type: "spinActiveBlock"
-  }
-}
-export const resetGame = () => {
-  return {
-    type: "resetGame"
-  }
-}
-export const acceleDropSpeed = () => {
-  return {
-    type: "acceleDropSpeed"
-  }
-}
-export const audioPlay = () => {
-  return {
-    type: "audioPlay",
-  }
-}
-export const audioStop = () => {
-  return {
-    type: "audioStop",
-  }
-}
-export const toggleAudioMute = () => {
-  return {
-    type: "toggleAudioMute"
-  }
-}
+export const putActiveBlock = () => ({
+  type: "putActiveBlock"
+})
+export const shiftActiveBlockLeft = () => ({
+  type: "shiftActiveBlockLeft"
+})
+export const shiftActiveBlockRight = () => ({
+  type: "shiftActiveBlockRight"
+})
+export const dropActiveBlock = () => ({
+  type: "dropActiveBlock"
+})
+export const fixActiveBlock = () => ({
+  type: "fixActiveBlock"
+})
+export const gameOver = () => ({
+  type: "gameOver"
+})
+export const spinActiveBlock = () => ({
+  type: "spinActiveBlock"
+})
+export const resetGame = () => ({
+  type: "resetGame"
+})
+export const acceleDropSpeed = () => ({
+  type: "acceleDropSpeed"
+})
+export const audioPlay = () => ({
+  type: "audioPlay",
+})
+export const audioStop = () => ({
+  type: "audioStop",
+})
+export const toggleAudioMute = () => ({
+  type: "toggleAudioMute"
+})
 
 export const tetrisActions = {
   putActiveBlock,
