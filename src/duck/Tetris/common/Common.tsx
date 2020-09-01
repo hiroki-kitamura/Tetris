@@ -40,6 +40,28 @@ export const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
   return true
 }
 
+export const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
+  for (let XY in activeBlock.cells) {
+
+    let [X, Y] = getPosNumber(XY)
+
+    // 一番下に落ちた時
+    if (Y === rowNumber - 1) return true
+    // 下にブロックがある時
+    if (!activeBlock.cells.hasOwnProperty(`${X},${Y + 1}`) && fixedCells[`${X},${Y + 1}`].exist === true)
+      return true;
+  }
+  return false
+}
+
+export const isGameOver = (fixedCells: Cells): boolean => {
+  for (let XY in fixedCells) {
+    let [X, Y] = getPosNumber(XY)
+
+    if (fixedCells[`${X},1`].exist === true) return true
+  }
+  return false
+}
 export const scoreCalculater = (removeColNumber: number) => {
   switch (removeColNumber) {
     case 0:

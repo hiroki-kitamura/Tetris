@@ -13,36 +13,13 @@ import { tetrisActions } from 'duck/Tetris/actions'
 // types 
 import { Cells, Block, TetrisState, TetrisProps } from 'duck/Tetris/types'
 // functions
-import { getPosNumber } from 'duck/Tetris/common/PositionShifter'
-import { rowNumber } from 'duck/Tetris/common/common'
+import { isGameOver, shouldFixActiveBlock } from 'duck/Tetris/common/common'
 
 const TetrisView = styled.div`
   display: flex;
 `
 
 const Tetris = (props: TetrisProps) => {
-  const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
-    for (let XY in activeBlock.cells) {
-
-      let [X, Y] = getPosNumber(XY)
-
-      // 一番下に落ちた時
-      if (Y === rowNumber - 1) return true
-      // 下にブロックがある時
-      if (!activeBlock.cells.hasOwnProperty(`${X},${Y + 1}`) && fixedCells[`${X},${Y + 1}`].exist === true)
-        return true;
-    }
-    return false
-  }
-
-  const isGameOver = (fixedCells: Cells): boolean => {
-    for (let XY in fixedCells) {
-      let [X, Y] = getPosNumber(XY)
-
-      if (fixedCells[`${X},1`].exist === true) return true
-    }
-    return false
-  }
 
   const dropActiveBlockIfCanDrop = () => {
     if (isGameOver(props.state.fixedCells)) {
