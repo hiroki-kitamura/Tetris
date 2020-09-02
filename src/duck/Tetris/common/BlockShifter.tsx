@@ -20,10 +20,6 @@ export const shiftBlockPos = (targetBlock: Block, addX: number, addY: number): B
 }
 
 export const shiftBlockIfStickout = (targetBlock: Block): Block => {
-  let shiftedBlock = {
-    ...targetBlock,
-    cells: {},
-  }
   let overlapX = 0;
   let overlapY = 0;
 
@@ -42,16 +38,12 @@ export const shiftBlockIfStickout = (targetBlock: Block): Block => {
       if (Math.abs(overlapY) < Math.abs(Y)) overlapY = - Y
     }
   }
-  shiftedBlock = shiftBlockPos(targetBlock, overlapX, overlapY)
-  return shiftedBlock
+
+  return shiftBlockPos(targetBlock, overlapX, overlapY)
 }
 
 export const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, preTargetBlock: Block): Block => {
 
-  let noOverlapingBlock = {
-    ...targetBlock,
-    cells: {},
-  }
   let shiftX = 0;
   let shiftY = 0;
   let i = 0;
@@ -81,14 +73,12 @@ export const shiftBlockIfOverlaping = (fixedCells: Cells, targetBlock: Block, pr
     }
     i++;
   }
-  noOverlapingBlock = shiftBlockPos(targetBlock, shiftX, shiftY)
 
-  return noOverlapingBlock
+  return shiftBlockPos(targetBlock, shiftX, shiftY)
 }
 
 export const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
   if (spinBlock.name === 'square') return spinBlock;
-
 
   const spinedBlockOrigin: Block = {
     ...spinBlock,
@@ -104,9 +94,7 @@ export const spinActiveBlock = (fixedCells: Cells, spinBlock: Block): Block => {
     const spinedX = -Y
     const spinedY = X
 
-    if (!spinedBlockOrigin.cells.hasOwnProperty(`${spinedX},${spinedY}`)) {
-      spinedBlockOrigin.cells[`${spinedX},${spinedY}`] = spinBlockOrigin.cells[XY]
-    }
+    spinedBlockOrigin.cells[`${spinedX},${spinedY}`] = spinBlockOrigin.cells[XY]
   }
 
   let spinedBlock = shiftBlockPos(spinedBlockOrigin, axisOfRotationX, axisOfRotationY);

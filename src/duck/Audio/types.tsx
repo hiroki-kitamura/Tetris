@@ -9,7 +9,3 @@ export interface AudioActions {
   audioStop,
   toggleAudioMute,
 }
-
-export interface AudioProps extends AudioActions {
-  state: AudioState
-}

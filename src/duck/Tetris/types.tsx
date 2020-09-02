@@ -35,7 +35,3 @@ export interface TetrisActions {
   resetGame,
   acceleDropSpeed,
 }
-
-export interface TetrisProps extends TetrisActions {
-  state: TetrisState
-}
