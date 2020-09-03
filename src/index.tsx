@@ -4,7 +4,7 @@ import { render } from 'react-dom';
 import { createStore, combineReducers, Store, Action } from 'redux';
 import { Provider } from 'react-redux'
 // container
-import Tetris from 'containers/Tetris';
+import { Tetris } from 'containers/Tetris';
 // reducer
 import { tetris } from 'duck/Tetris/reducers'
 import { audio } from 'duck/Audio/reducers'
@@ -13,10 +13,13 @@ import { TetrisState } from 'duck/Tetris/types'
 import { AudioState } from 'duck/Audio/types'
 
 interface StoreState {
-  tetris: TetrisState
-  audio: AudioState
+  tetrisReducer: {
+    tetris: TetrisState
+    audio: AudioState
+  }
 }
-const rootReducer = combineReducers({ tetris, audio })
+const tetrisReducer = combineReducers({ tetris, audio })
+const rootReducer = combineReducers({ tetrisReducer })
 
 const store: Store<StoreState, Action> = createStore(rootReducer)
 
