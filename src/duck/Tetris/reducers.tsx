@@ -106,10 +106,11 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         isGameOver: false,
         dropSpeed: 1000,
       }
-    case 'acceleDropSpeed':
+    case 'setDropSpeed':
+      console.log(action)
       return {
         ...tetrisState,
-        dropSpeed: tetrisState.dropSpeed * 0.95
+        dropSpeed: action.dropSpeed
       }
     default: return tetrisState
   }

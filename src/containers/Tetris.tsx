@@ -9,7 +9,7 @@ import { Screen } from 'components/Screen'
 import { Controller } from 'components/Controller'
 import { functionalAudio as Audio } from 'components/Audio'
 // actions 
-import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, resetGame, acceleDropSpeed } from 'duck/Tetris/actions'
+import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, resetGame, setDropSpeed } from 'duck/Tetris/actions'
 import { audioPlay, audioStop, toggleAudioMute } from 'duck/Audio/actions'
 // types 
 import { TetrisState, TetrisActions } from 'duck/Tetris/types'
@@ -24,22 +24,6 @@ const TetrisView = styled.div`
 interface MapTetrisState {
   tetris: TetrisState
   audio: AudioState
-}
-
-interface MapTetrisActions {
-  tetris: TetrisActions,
-  audio: AudioActions
-}
-
-interface TetrisProps {
-  tetris: {
-    tetris: TetrisActions & {
-      state: TetrisState
-    }
-    audio: AudioActions & {
-      state: AudioState
-    }
-  }
 }
 
 declare module 'react-redux' {
@@ -86,16 +70,20 @@ export const Tetris = () => {
 
     window.addEventListener('keydown', windowKeyDownEvent)
 
-    const acceleTimeoutId = setTimeout(() => {
-      dispatch(acceleDropSpeed())
-    }, 3000);
-
     return () => {
       clearTimeout(dropTimeoutId)
-      clearInterval(acceleTimeoutId)
       window.removeEventListener('keydown', windowKeyDownEvent)
     }
   }, [state.tetris.activeBlock])
+
+  useEffect(() => {
+    if (!state.tetris.isPlay) return;
+    const acceleTimeoutId = setTimeout(() => {
+      dispatch(setDropSpeed(state.tetris.dropSpeed * 0.98))
+    }, 3000);
+
+    return () => clearInterval(acceleTimeoutId)
+  }, [state.tetris.dropSpeed, state.tetris.isPlay])
 
   useEffect(() => {
     if (state.tetris.isPlay) dispatch(audioPlay())

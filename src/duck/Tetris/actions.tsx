@@ -1,3 +1,5 @@
+import { bindActionCreators } from "redux"
+
 export const putActiveBlock = () => ({
   type: "putActiveBlock"
 })
@@ -22,8 +24,9 @@ export const spinActiveBlock = () => ({
 export const resetGame = () => ({
   type: "resetGame"
 })
-export const acceleDropSpeed = () => ({
-  type: "acceleDropSpeed"
+export const setDropSpeed = (dropSpeed) => ({
+  type: "setDropSpeed",
+  dropSpeed: dropSpeed
 })
 
 export const tetrisActions = {
@@ -35,5 +38,5 @@ export const tetrisActions = {
   gameOver,
   spinActiveBlock,
   resetGame,
-  acceleDropSpeed,
+  setDropSpeed,
 }
