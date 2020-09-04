@@ -138,18 +138,11 @@ const NextBlockCellsCreator = (nextBlock: NextBlock): Array<JSX.Element> => {
   }
 
   const nextBlockCells = deepMerge(blankCells, nextBlock.cells)
-  const cellList = []
-  let i = 0
 
-  for (const XY in nextBlockCells) {
+  return Object.keys(nextBlockCells).map((XY) => {
     const [X, Y] = getPosNumber(XY)
-    cellList.push(
-      <NextCell name={nextBlock.name} backgroundColor={nextBlockCells[`${X},${Y}`]['backgroundColor']} key={i} />
-    )
-    i++
-  }
-
-  return cellList
+    return <NextCell name={nextBlock.name} backgroundColor={nextBlockCells[`${X},${Y}`]['backgroundColor']} key={XY} />
+  })
 }
 
 interface ScreenProps {
