@@ -21,6 +21,9 @@ export const gameOver = () => ({
 export const spinActiveBlock = () => ({
   type: "spinActiveBlock"
 })
+export const startGame = () => ({
+  type: "startGame"
+})
 export const resetGame = () => ({
   type: "resetGame"
 })

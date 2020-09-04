@@ -77,6 +77,12 @@ interface Cells {
   [index: string]: Cell
 }
 
+interface Block {
+  name: string,
+  axisOfRotation: string,
+  cells: Cells,
+}
+
 interface NextBlock {
   name: string,
   cells: Cells
@@ -105,14 +111,15 @@ const makeBlankSquareCells = (colNumber: number) => {
   return cells
 }
 
-const viewCellsCreator = (cells): Array<JSX.Element> => {
+const viewCellsCreator = (fixedCells, activeBlockCells): Array<JSX.Element> => {
+  const viewCells = deepMerge(fixedCells, activeBlockCells)
   const cellList = []
   let i = 0
 
   for (let y = 0; y < 20; y++) {
     for (let x = 0; x < 10; x++) {
       cellList.push(
-        <Cell backgroundColor={cells[`${x},${y}`]['backgroundColor']} key={i} />
+        <Cell backgroundColor={viewCells[`${x},${y}`]['backgroundColor']} key={i} />
       )
       i++
     }
@@ -146,7 +153,8 @@ const NextBlockCellsCreator = (nextBlock: NextBlock): Array<JSX.Element> => {
 }
 
 interface ScreenProps {
-  viewCells: Cells,
+  fixedCells: Cells,
+  activeBlockCells: Cells,
   nextBlock: {
     name: string,
     cells: Cells
@@ -156,7 +164,8 @@ interface ScreenProps {
 }
 
 export const Screen = (props: ScreenProps): JSX.Element => {
-  let viewCells = viewCellsCreator(props.viewCells)
+  console.log(props)
+  let viewCells = viewCellsCreator(props.fixedCells, props.activeBlockCells)
   let viewNextBlockCells = NextBlockCellsCreator(props.nextBlock)
 
   return (

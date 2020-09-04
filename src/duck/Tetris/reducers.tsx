@@ -10,9 +10,8 @@ import { removeColIfFulledCol, extractColShouldRemove } from 'duck/Tetris/common
 import { getBlankCells, mergeCells, scoreCalculater } from 'duck/Tetris/common/Common'
 
 const initialTetrisState: TetrisState = {
-  viewCells: getBlankCells(),
   fixedCells: getBlankCells(),
-  activeBlock: null,
+  activeBlock: BlockCreator(),
   nextBlock: BlockCreator(),
   dropSpeed: 1000,
   score: 0,
@@ -25,7 +24,6 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
     case 'putActiveBlock':
       return {
         ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, tetrisState.nextBlock.cells),
         activeBlock: tetrisState.nextBlock,
         nextBlock: BlockCreator(),
         isPlay: true,
@@ -38,7 +36,6 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, leftShiftedBlock.cells),
         activeBlock: leftShiftedBlock
       }
     case 'shiftActiveBlockRight':
@@ -49,7 +46,6 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, rightShiftedBlock.cells),
         activeBlock: rightShiftedBlock
       }
     case 'dropActiveBlock':
@@ -57,7 +53,6 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, dropedActiveBlock.cells),
         fixedCells: tetrisState.fixedCells,
         activeBlock: dropedActiveBlock,
       }
@@ -70,7 +65,6 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells),
         fixedCells: newFixedCells,
         activeBlock: newActiveBlock,
         nextBlock: BlockCreator(),
@@ -91,15 +85,18 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
 
       return {
         ...tetrisState,
-        viewCells: mergeCells(tetrisState.fixedCells, spinedBlock.cells),
         activeBlock: spinedBlock
+      }
+    case 'startGame':
+      return {
+        ...tetrisState,
+        isPlay: true,
       }
     case 'resetGame':
       return {
         ...tetrisState,
-        viewCells: getBlankCells(),
         fixedCells: getBlankCells(),
-        activeBlock: null,
+        activeBlock: BlockCreator(),
         nextBlock: BlockCreator(),
         score: 0,
         isPlay: false,

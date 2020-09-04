@@ -14,7 +14,6 @@ export interface Block {
 }
 
 export interface TetrisState {
-  viewCells: Cells,
   fixedCells: Cells,
   activeBlock: Block | null,
   nextBlock: Block,

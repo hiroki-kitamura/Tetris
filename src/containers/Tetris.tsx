@@ -9,11 +9,11 @@ import { Screen } from 'components/Screen'
 import { Controller } from 'components/Controller'
 import { functionalAudio as Audio } from 'components/Audio'
 // actions 
-import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, resetGame, setDropSpeed } from 'duck/Tetris/actions'
+import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, startGame, resetGame, setDropSpeed } from 'duck/Tetris/actions'
 import { audioPlay, audioStop, toggleAudioMute } from 'duck/Audio/actions'
 // types 
-import { TetrisState, TetrisActions } from 'duck/Tetris/types'
-import { AudioState, AudioActions } from 'duck/Audio/types'
+import { TetrisState } from 'duck/Tetris/types'
+import { AudioState } from 'duck/Audio/types'
 // functions
 import { isGameOver, shouldFixActiveBlock } from 'duck/Tetris/common/common'
 
@@ -63,7 +63,7 @@ export const Tetris = () => {
     }
   }
   useEffect(() => {
-    if (!state.tetris.activeBlock) return
+    if (!state.tetris.isPlay) return
     const dropTimeoutId = setTimeout(() => {
       dropActiveBlockIfCanDrop()
     }, state.tetris.dropSpeed)
@@ -74,7 +74,7 @@ export const Tetris = () => {
       clearTimeout(dropTimeoutId)
       window.removeEventListener('keydown', windowKeyDownEvent)
     }
-  }, [state.tetris.activeBlock])
+  }, [state.tetris.activeBlock, state.tetris.isPlay])
 
   useEffect(() => {
     if (!state.tetris.isPlay) return;
@@ -93,7 +93,8 @@ export const Tetris = () => {
   return (
     <TetrisView>
       <Screen
-        viewCells={state.tetris.viewCells}
+        activeBlockCells={state.tetris.activeBlock.cells}
+        fixedCells={state.tetris.fixedCells}
         nextBlock={state.tetris.nextBlock}
         isGameOver={state.tetris.isGameOver}
         score={state.tetris.score} />
@@ -102,7 +103,7 @@ export const Tetris = () => {
           moveLeft: () => dispatch(putActiveBlock()),
           moveRight: () => dispatch(shiftActiveBlockRight()),
           moveBottom: () => dispatch(dropActiveBlock()),
-          startGame: () => dispatch(putActiveBlock()),
+          startGame: () => dispatch(startGame()),
           resetGame: () => dispatch(resetGame()),
           toggleAudioMute: () => dispatch(toggleAudioMute()),
           spin: () => dispatch(spinActiveBlock())
