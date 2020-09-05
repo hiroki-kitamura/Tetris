@@ -49,12 +49,9 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         activeBlock: rightShiftedBlock
       }
     case 'dropActiveBlock':
-      const dropedActiveBlock = shiftBlockPos(tetrisState.activeBlock, 0, 1)
-
       return {
         ...tetrisState,
-        fixedCells: tetrisState.fixedCells,
-        activeBlock: dropedActiveBlock,
+        activeBlock: shiftBlockPos(tetrisState.activeBlock, -1, 1),
       }
     case 'fixActiveBlock':
       const mergedCells = mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells)
@@ -70,22 +67,14 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         nextBlock: BlockCreator(),
         score: newScore
       }
-    case 'gameOver':
-      return {
-        ...tetrisState,
-        activeBlock: null,
-        isGameOver: true,
-        isPlay: false,
-        audio: {
-          isPlay: false
-        }
-      }
     case 'spinActiveBlock':
-      const spinedBlock = spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
-
       return {
         ...tetrisState,
-        activeBlock: spinedBlock
+        activeBlock: spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
+      }
+    case 'removeFullRow':
+      return {
+        ...tetrisState
       }
     case 'startGame':
       return {
@@ -103,8 +92,14 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         isGameOver: false,
         dropSpeed: 1000,
       }
+    case 'gameOver':
+      return {
+        ...tetrisState,
+        activeBlock: BlockCreator(),
+        isGameOver: true,
+        isPlay: false,
+      }
     case 'setDropSpeed':
-      console.log(action)
       return {
         ...tetrisState,
         dropSpeed: action.dropSpeed

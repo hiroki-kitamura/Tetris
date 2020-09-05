@@ -1,8 +1,7 @@
 // node_modules
 import * as React from 'react';
 import { useEffect } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect, useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import styled from 'styled-components';
 // componets
 import { Screen } from 'components/Screen'

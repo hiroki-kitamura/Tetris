@@ -15,6 +15,9 @@ export const dropActiveBlock = () => ({
 export const fixActiveBlock = () => ({
   type: "fixActiveBlock"
 })
+export const removefullRow= () => ({
+  type: "removeFullRow"
+})
 export const gameOver = () => ({
   type: "gameOver"
 })
