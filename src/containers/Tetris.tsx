@@ -8,13 +8,13 @@ import { Screen } from 'components/Screen'
 import { Controller } from 'components/Controller'
 import { functionalAudio as Audio } from 'components/Audio'
 // actions 
-import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, startGame, resetGame, setDropSpeed } from 'duck/Tetris/actions'
+import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, removeFullRow, setScore, startGame, resetGame, setDropSpeed } from 'duck/Tetris/actions'
 import { audioPlay, audioStop, toggleAudioMute } from 'duck/Audio/actions'
 // types 
 import { TetrisState } from 'duck/Tetris/types'
 import { AudioState } from 'duck/Audio/types'
 // functions
-import { isGameOver, shouldFixActiveBlock } from 'duck/Tetris/common/common'
+import { isGameOver, shouldFixActiveBlock, existFullRow, getFullRowList, scoreCalculater } from 'duck/Tetris/common/common'
 
 const TetrisView = styled.div`
   display: flex;
@@ -32,16 +32,6 @@ declare module 'react-redux' {
 export const Tetris = () => {
   const state = useSelector(state => state.tetrisReducer)
   const dispatch = useDispatch()
-
-  const dropActiveBlockIfCanDrop = () => {
-    if (isGameOver(state.tetris.fixedCells)) {
-      dispatch(gameOver())
-    } else if (shouldFixActiveBlock(state.tetris.activeBlock, state.tetris.fixedCells)) {
-      dispatch(fixActiveBlock())
-    } else {
-      dispatch(dropActiveBlock())
-    }
-  }
 
   const windowKeyDownEvent = (e) => {
     switch (e.key) {
@@ -61,6 +51,25 @@ export const Tetris = () => {
         dispatch(spinActiveBlock())
     }
   }
+
+  const dropActiveBlockIfCanDrop = () => {
+    if (isGameOver(state.tetris.fixedCells)) {
+      dispatch(gameOver())
+    } else if (shouldFixActiveBlock(state.tetris.activeBlock, state.tetris.fixedCells)) {
+      dispatch(fixActiveBlock())
+    } else {
+      dispatch(dropActiveBlock())
+    }
+  }
+
+  useEffect(() => {
+    if (existFullRow(state.tetris.fixedCells)) {
+      const FullRowNum = getFullRowList(state.tetris.fixedCells).length
+      dispatch(setScore(state.tetris.score + scoreCalculater(FullRowNum)))
+      dispatch(removeFullRow())
+    }
+  }, [state.tetris.fixedCells])
+
   useEffect(() => {
     if (!state.tetris.isPlay) return
     const dropTimeoutId = setTimeout(() => {

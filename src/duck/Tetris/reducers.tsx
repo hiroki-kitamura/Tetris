@@ -6,7 +6,7 @@ import { TetrisState } from 'duck/Tetris/types'
 // functions
 import { BlockCreator } from 'duck/Tetris/common/BlockCreator'
 import { shiftBlockPos, shiftBlockIfOverlaping, shiftBlockIfStickout, spinActiveBlock } from 'duck/Tetris/common/BlockShifter'
-import { removeColIfFulledCol, extractColShouldRemove } from 'duck/Tetris/common/Remover'
+import { removeFullRow } from 'duck/Tetris/common/Remover'
 import { getBlankCells, mergeCells, scoreCalculater } from 'duck/Tetris/common/Common'
 
 const initialTetrisState: TetrisState = {
@@ -51,13 +51,10 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
     case 'dropActiveBlock':
       return {
         ...tetrisState,
-        activeBlock: shiftBlockPos(tetrisState.activeBlock, -1, 1),
+        activeBlock: shiftBlockPos(tetrisState.activeBlock, 0, 1),
       }
     case 'fixActiveBlock':
-      const mergedCells = mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells)
-      const newFixedCells = removeColIfFulledCol(mergedCells)
-      const removeColList = extractColShouldRemove(mergedCells)
-      const newScore = scoreCalculater(removeColList.length) + tetrisState.score
+      const newFixedCells = mergeCells(tetrisState.fixedCells, tetrisState.activeBlock.cells)
       const newActiveBlock = tetrisState.nextBlock;
 
       return {
@@ -65,16 +62,22 @@ export const tetris = (tetrisState = initialTetrisState, action) => {
         fixedCells: newFixedCells,
         activeBlock: newActiveBlock,
         nextBlock: BlockCreator(),
-        score: newScore
       }
     case 'spinActiveBlock':
       return {
         ...tetrisState,
-        activeBlock: spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock);
+        activeBlock: spinActiveBlock(tetrisState.fixedCells, tetrisState.activeBlock)
       }
     case 'removeFullRow':
       return {
-        ...tetrisState
+        ...tetrisState,
+        fixedCells: removeFullRow(tetrisState.fixedCells)
+      }
+    case 'setScore':
+      console.log(action.score)
+      return {
+        ...tetrisState,
+        score: action.score
       }
     case 'startGame':
       return {

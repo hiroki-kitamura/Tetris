@@ -40,6 +40,29 @@ export const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
   return true
 }
 
+export const existFullRow = (fixedCells: Cells): boolean => {
+  for (let Y = 0; Y < rowNumber; Y++) {
+    let existCellNum = 0;
+    for (let X = 0; X < colNumber; X++) {
+      existCellNum = fixedCells[`${X},${Y}`].exist ? existCellNum + 1 : existCellNum;
+    }
+    if (existCellNum === colNumber) return true;
+  }
+  return false
+}
+
+export const getFullRowList = (cells: Cells) => {
+  let fullRowList = [];
+  for (let Y = 0; Y < rowNumber; Y++) {
+    let fullRowFlg = true;
+    for (let X = 0; X < colNumber; X++) {
+      if (!cells[`${X},${Y}`].exist) fullRowFlg = false;
+    }
+    if (fullRowFlg) fullRowList.push(Y)
+  }
+  return fullRowList
+}
+
 export const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
   return Object.keys(activeBlock.cells).some((XY) => {
 

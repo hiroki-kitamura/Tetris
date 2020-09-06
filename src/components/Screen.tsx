@@ -164,7 +164,6 @@ interface ScreenProps {
 }
 
 export const Screen = (props: ScreenProps): JSX.Element => {
-  console.log(props)
   let viewCells = viewCellsCreator(props.fixedCells, props.activeBlockCells)
   let viewNextBlockCells = NextBlockCellsCreator(props.nextBlock)
 

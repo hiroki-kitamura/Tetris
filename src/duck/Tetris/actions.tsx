@@ -15,8 +15,12 @@ export const dropActiveBlock = () => ({
 export const fixActiveBlock = () => ({
   type: "fixActiveBlock"
 })
-export const removefullRow= () => ({
+export const removeFullRow = () => ({
   type: "removeFullRow"
+})
+export const setScore = (score: number) => ({
+  type: "setScore",
+  score: score
 })
 export const gameOver = () => ({
   type: "gameOver"
@@ -30,19 +34,8 @@ export const startGame = () => ({
 export const resetGame = () => ({
   type: "resetGame"
 })
-export const setDropSpeed = (dropSpeed) => ({
+export const setDropSpeed = (dropSpeed: number) => ({
   type: "setDropSpeed",
   dropSpeed: dropSpeed
 })
 
-export const tetrisActions = {
-  putActiveBlock,
-  shiftActiveBlockLeft,
-  shiftActiveBlockRight,
-  dropActiveBlock,
-  fixActiveBlock,
-  gameOver,
-  spinActiveBlock,
-  resetGame,
-  setDropSpeed,
-}
