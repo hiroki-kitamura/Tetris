@@ -1,8 +1,10 @@
 // types
 import { Cells, Block } from 'duck/Tetris/types'
+// config
+import { MAX_COL_NUMBER, MAX_ROW_NUMBER } from 'duck/Tetris/config'
 // functions 
 import { getAddedPos, getPosNumber } from 'duck/Tetris/common/PositionShifter'
-import { colNumber, rowNumber, canExistBlock } from 'duck/Tetris/common/Common'
+import { canExistBlock } from 'duck/Tetris/common/Common'
 
 export const shiftBlockPos = (targetBlock: Block, addX: number, addY: number): Block => {
   const shiftedBlock = {
@@ -25,14 +27,14 @@ export const shiftBlockIfStickout = (targetBlock: Block): Block => {
 
   for (const XY in targetBlock.cells) {
     let [X, Y] = getPosNumber(XY)
-    if (X >= colNumber) {
-      if (Math.abs(overlapX) < Math.abs(colNumber - X - 1)) overlapX = colNumber - X - 1
+    if (X >= MAX_COL_NUMBER) {
+      if (Math.abs(overlapX) < Math.abs(MAX_COL_NUMBER - X - 1)) overlapX = MAX_COL_NUMBER - X - 1
     }
     if (X < 0) {
       if (Math.abs(overlapX) < Math.abs(X)) overlapX = - X
     }
-    if (Y >= rowNumber) {
-      if (Math.abs(overlapY) < Math.abs(colNumber - Y - 1)) overlapY = rowNumber - Y - 1
+    if (Y >= MAX_ROW_NUMBER) {
+      if (Math.abs(overlapY) < Math.abs(MAX_COL_NUMBER - Y - 1)) overlapY = MAX_ROW_NUMBER - Y - 1
     }
     if (Y < 0) {
       if (Math.abs(overlapY) < Math.abs(Y)) overlapY = - Y

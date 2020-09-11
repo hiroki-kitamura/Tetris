@@ -1,6 +1,7 @@
 const path = require('path');
 const src = path.resolve(__dirname, 'src');
-
+// actions
+import { ActionTypes } from 'duck/Audio/actions'
 // types
 import { AudioState } from 'duck/Audio/types'
 
@@ -12,17 +13,17 @@ const initialAudioState: AudioState = {
 
 export const audio = (audioState = initialAudioState, action) => {
   switch (action.type) {
-    case 'audioPlay':
+    case ActionTypes.audioPlay:
       return {
         ...audioState,
         isPlay: true
       }
-    case 'audioStop':
+    case ActionTypes.audioStop:
       return {
         ...audioState,
         isPlay: false
       }
-    case 'toggleAudioMute':
+    case ActionTypes.toggleAudioMute:
       return {
         ...audioState,
         isMute: !audioState.isMute

@@ -13,13 +13,10 @@ import { TetrisState } from 'duck/Tetris/types'
 import { AudioState } from 'duck/Audio/types'
 
 interface StoreState {
-  tetrisReducer: {
-    tetris: TetrisState
-    audio: AudioState
-  }
+  tetris: TetrisState
+  audio: AudioState
 }
-const tetrisReducer = combineReducers({ tetris, audio })
-const rootReducer = combineReducers({ tetrisReducer })
+const rootReducer = combineReducers({ tetris, audio })
 
 const store: Store<StoreState, Action> = createStore(rootReducer)
 

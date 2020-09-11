@@ -1,12 +1,11 @@
 // node_modules
 const deepMerge = require('deepmerge')
+// config
+import { MAX_COL_NUMBER, MAX_ROW_NUMBER } from 'duck/Tetris/config'
 // types
 import { Cells, Cell, Block } from 'duck/Tetris/types'
 // functions
 import { getPosNumber } from 'duck/Tetris/common/PositionShifter'
-
-export const colNumber: number = 10;
-export const rowNumber: number = 20;
 
 export const blankCell: Cell = {
   exist: false,
@@ -16,8 +15,8 @@ export const blankCell: Cell = {
 export const getBlankCells = (): Cells => {
   const cells = {}
 
-  for (let x = 0; x < colNumber; x++) {
-    for (let y = 0; y < rowNumber; y++) {
+  for (let x = 0; x < MAX_COL_NUMBER; x++) {
+    for (let y = 0; y < MAX_ROW_NUMBER; y++) {
       cells[`${x},${y}`] = blankCell
     }
   }
@@ -33,7 +32,7 @@ export const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
   for (const XY in block.cells) {
     const [X, Y] = getPosNumber(XY)
 
-    if (X < 0 || X >= colNumber || Y < 0 || Y >= rowNumber) return false
+    if (X < 0 || X >= MAX_COL_NUMBER || Y < 0 || Y >= MAX_ROW_NUMBER) return false
 
     if (fixedCells[XY].exist) return false
   }
@@ -41,51 +40,48 @@ export const canExistBlock = (fixedCells: Cells, block: Block): boolean => {
 }
 
 export const existFullRow = (fixedCells: Cells): boolean => {
-  for (let Y = 0; Y < rowNumber; Y++) {
-    let existCellNum = 0;
-    for (let X = 0; X < colNumber; X++) {
-      existCellNum = fixedCells[`${X},${Y}`].exist ? existCellNum + 1 : existCellNum;
+  for (let Y = 0; Y < MAX_ROW_NUMBER; Y++) {
+    const Row = [];
+    for (let X = 0; X < MAX_COL_NUMBER; X++) {
+      Row.push(fixedCells[`${X},${Y}`])
     }
-    if (existCellNum === colNumber) return true;
+    if (!Row.find(cell => cell.exist === false)) return true
   }
   return false
 }
 
 export const getFullRowList = (cells: Cells) => {
   let fullRowList = [];
-  for (let Y = 0; Y < rowNumber; Y++) {
-    let fullRowFlg = true;
-    for (let X = 0; X < colNumber; X++) {
-      if (!cells[`${X},${Y}`].exist) fullRowFlg = false;
+  for (let Y = 0; Y < MAX_ROW_NUMBER; Y++) {
+    const Row = [];
+    for (let X = 0; X < MAX_COL_NUMBER; X++) {
+      Row.push(cells[`${X},${Y}`])
     }
-    if (fullRowFlg) fullRowList.push(Y)
+    if (!Row.find(cell => cell.exist === false)) fullRowList.push(Y);
   }
   return fullRowList
 }
 
-export const shouldFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean => {
-  return Object.keys(activeBlock.cells).some((XY) => {
-
+export const isFixActiveBlock = (activeBlock: Block, fixedCells: Cells): boolean =>
+  Object.keys(activeBlock.cells).some((XY) => {
     const [X, Y] = getPosNumber(XY)
 
     // 一番下に落ちた時
-    if (Y === rowNumber - 1) return true
+    if (Y === MAX_ROW_NUMBER - 1) return true
     // 下にブロックがある時
-    if (!activeBlock.cells.hasOwnProperty(`${X},${Y + 1}`) && fixedCells[`${X},${Y + 1}`].exist === true)
-      return true;
+    return !activeBlock.cells.hasOwnProperty(`${X},${Y + 1}`) && fixedCells[`${X},${Y + 1}`].exist
   })
-}
 
-export const isGameOver = (fixedCells: Cells): boolean => {
-  return Object.keys(fixedCells).some((XY) => {
-    const [X, Y] = getPosNumber(XY)
+export const isGameOver = (fixedCells: Cells): boolean =>
+  Object.keys(fixedCells).some((XY) => {
+    const [X] = getPosNumber(XY)
 
-    if (fixedCells[`${X},1`].exist === true) return true
+    return fixedCells[`${X},1`].exist
   })
-}
 
-export const scoreCalculater = (removeColNumber: number) => {
-  switch (removeColNumber) {
+
+export const scoreCalculater = (removeRowNum: number) => {
+  switch (removeRowNum) {
     case 0:
       return 0
     case 1:

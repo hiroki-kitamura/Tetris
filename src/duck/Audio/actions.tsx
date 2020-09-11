@@ -1,16 +1,15 @@
+export enum ActionTypes {
+  audioPlay = "audioPlay",
+  audioStop = "audioStop",
+  toggleAudioMute = "toggleAudioMute"
+}
 
 export const audioPlay = () => ({
-  type: "audioPlay",
+  type: ActionTypes.audioPlay,
 })
 export const audioStop = () => ({
-  type: "audioStop",
+  type: ActionTypes.audioStop,
 })
 export const toggleAudioMute = () => ({
-  type: "toggleAudioMute"
+  type: ActionTypes.toggleAudioMute
 })
-
-export const audioActions = {
-  audioPlay,
-  audioStop,
-  toggleAudioMute
-}

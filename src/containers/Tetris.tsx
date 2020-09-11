@@ -8,13 +8,13 @@ import { Screen } from 'components/Screen'
 import { Controller } from 'components/Controller'
 import { functionalAudio as Audio } from 'components/Audio'
 // actions 
-import { putActiveBlock, shiftActiveBlockLeft, shiftActiveBlockRight, dropActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, removeFullRow, setScore, startGame, resetGame, setDropSpeed } from 'duck/Tetris/actions'
+import { shiftActiveBlock, fixActiveBlock, gameOver, spinActiveBlock, removeFullRow, setScore, startGame, resetGame, setDropSpeed } from 'duck/Tetris/actions'
 import { audioPlay, audioStop, toggleAudioMute } from 'duck/Audio/actions'
 // types 
 import { TetrisState } from 'duck/Tetris/types'
 import { AudioState } from 'duck/Audio/types'
 // functions
-import { isGameOver, shouldFixActiveBlock, existFullRow, getFullRowList, scoreCalculater } from 'duck/Tetris/common/common'
+import { isGameOver, isFixActiveBlock, existFullRow, getFullRowList, scoreCalculater } from 'duck/Tetris/common/common'
 
 const TetrisView = styled.div`
   display: flex;
@@ -26,22 +26,23 @@ interface MapTetrisState {
 }
 
 declare module 'react-redux' {
-  function useSelector(Function): MapTetrisState
+  function useSelector<T>(Function): T
 }
 
 export const Tetris = () => {
-  const state = useSelector(state => state.tetrisReducer)
+  const state = useSelector<MapTetrisState>(state => state)
   const dispatch = useDispatch()
 
   const windowKeyDownEvent = (e) => {
+    console.log(e)
     switch (e.key) {
       case 'ArrowLeft':
       case 'h':
-        dispatch(shiftActiveBlockLeft())
+        dispatch(shiftActiveBlock(-1, 0))
         break;
       case 'ArrowRight':
       case 'l':
-        dispatch(shiftActiveBlockRight())
+        dispatch(shiftActiveBlock(1, 0))
         break;
       case 'ArrowDown':
       case 'j':
@@ -55,10 +56,10 @@ export const Tetris = () => {
   const dropActiveBlockIfCanDrop = () => {
     if (isGameOver(state.tetris.fixedCells)) {
       dispatch(gameOver())
-    } else if (shouldFixActiveBlock(state.tetris.activeBlock, state.tetris.fixedCells)) {
+    } else if (isFixActiveBlock(state.tetris.activeBlock, state.tetris.fixedCells)) {
       dispatch(fixActiveBlock())
     } else {
-      dispatch(dropActiveBlock())
+      dispatch(shiftActiveBlock(0, 1))
     }
   }
 
@@ -68,7 +69,7 @@ export const Tetris = () => {
       dispatch(setScore(state.tetris.score + scoreCalculater(FullRowNum)))
       dispatch(removeFullRow())
     }
-  }, [state.tetris.fixedCells])
+  }, [state.tetris.fixedCells, state.tetris.score])
 
   useEffect(() => {
     if (!state.tetris.isPlay) return
@@ -82,7 +83,7 @@ export const Tetris = () => {
       clearTimeout(dropTimeoutId)
       window.removeEventListener('keydown', windowKeyDownEvent)
     }
-  }, [state.tetris.activeBlock, state.tetris.isPlay])
+  }, [state.tetris.activeBlock, state.tetris.isPlay, state.tetris.dropSpeed])
 
   useEffect(() => {
     if (!state.tetris.isPlay) return;
@@ -108,9 +109,9 @@ export const Tetris = () => {
         score={state.tetris.score} />
       <Controller
         clickEvent={{
-          moveLeft: () => dispatch(putActiveBlock()),
-          moveRight: () => dispatch(shiftActiveBlockRight()),
-          moveBottom: () => dispatch(dropActiveBlock()),
+          moveLeft: () => dispatch(shiftActiveBlock(-1, 0)),
+          moveRight: () => dispatch(shiftActiveBlock(1, 0)),
+          moveBottom: () => dispatch(dropActiveBlockIfCanDrop),
           startGame: () => dispatch(startGame()),
           resetGame: () => dispatch(resetGame()),
           toggleAudioMute: () => dispatch(toggleAudioMute()),

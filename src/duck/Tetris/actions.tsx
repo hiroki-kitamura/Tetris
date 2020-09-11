@@ -1,41 +1,52 @@
-import { bindActionCreators } from "redux"
+export enum ActionTypes {
+  putActiveBlock = "putActiveBlock",
+  shiftActiveBlock = "shiftActiveBlock",
+  dropActiveBlock = "dropActiveBlock",
+  fixActiveBlock = "fixActiveBlock",
+  removeFullRow = "removeFullRow",
+  setScore = "setScore",
+  gameOver = "gameOver",
+  spinActiveBlock = "spinActiveBlock",
+  startGame = "startGame",
+  resetGame = "resetGame",
+  setDropSpeed = "setDropSpeed"
+}
 
 export const putActiveBlock = () => ({
-  type: "putActiveBlock"
+  type: ActionTypes.putActiveBlock
 })
-export const shiftActiveBlockLeft = () => ({
-  type: "shiftActiveBlockLeft"
-})
-export const shiftActiveBlockRight = () => ({
-  type: "shiftActiveBlockRight"
+export const shiftActiveBlock = (directionX: number = -1 | 0 | -1, directionY: number = 0 | 1) => ({
+  type: ActionTypes.shiftActiveBlock,
+  directionX: directionX,
+  directionY: directionY
 })
 export const dropActiveBlock = () => ({
-  type: "dropActiveBlock"
+  type: ActionTypes.dropActiveBlock
 })
 export const fixActiveBlock = () => ({
-  type: "fixActiveBlock"
+  type: ActionTypes.fixActiveBlock
 })
 export const removeFullRow = () => ({
-  type: "removeFullRow"
+  type: ActionTypes.removeFullRow
 })
 export const setScore = (score: number) => ({
-  type: "setScore",
+  type: ActionTypes.setScore,
   score: score
 })
 export const gameOver = () => ({
-  type: "gameOver"
+  type: ActionTypes.gameOver
 })
 export const spinActiveBlock = () => ({
-  type: "spinActiveBlock"
+  type: ActionTypes.spinActiveBlock
 })
 export const startGame = () => ({
-  type: "startGame"
+  type: ActionTypes.startGame
 })
 export const resetGame = () => ({
-  type: "resetGame"
+  type: ActionTypes.resetGame
 })
 export const setDropSpeed = (dropSpeed: number) => ({
-  type: "setDropSpeed",
+  type: ActionTypes.setDropSpeed,
   dropSpeed: dropSpeed
 })
 
