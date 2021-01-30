@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "yarn webpack-dev-server"
+    "dev": "yarn webpack-dev-server",
+    "build": "yarn webpack"
   },
   "author": "",
   "license": "ISC",
